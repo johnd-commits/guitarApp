@@ -13,7 +13,7 @@ describe('app shell', () => {
 
     expect(
       screen.getByRole('heading', {
-        name: /metronome, pendulum, and strum patterns/i,
+        name: /metronome/i,
       }),
     ).toBeInTheDocument()
     expect(screen.getByRole('navigation', { name: 'Main' })).toBeInTheDocument()

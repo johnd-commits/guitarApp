@@ -1,4 +1,5 @@
 import { MAX_TEMPO, MIN_TEMPO, useSettingsStore } from '../stores/settingsStore'
+import { metronomeEngine } from '../audio/metronomeEngine'
 
 export function TransportBar() {
   const tempo = useSettingsStore((s) => s.tempo)
@@ -6,12 +7,19 @@ export function TransportBar() {
   const setTempo = useSettingsStore((s) => s.setTempo)
   const togglePlaying = useSettingsStore((s) => s.togglePlaying)
 
+  async function onPlayToggle() {
+    if (!isPlaying) {
+      await metronomeEngine.unlock()
+    }
+    togglePlaying()
+  }
+
   return (
     <div className="border-t border-line bg-raised px-4 py-3">
       <div className="mx-auto flex max-w-lg items-center gap-4">
         <button
           type="button"
-          onClick={togglePlaying}
+          onClick={() => void onPlayToggle()}
           aria-pressed={isPlaying}
           aria-label={isPlaying ? 'Stop' : 'Play'}
           className={[
