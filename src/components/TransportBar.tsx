@@ -1,5 +1,6 @@
 import { MAX_TEMPO, MIN_TEMPO, useSettingsStore } from '../stores/settingsStore'
 import { metronomeEngine } from '../audio/metronomeEngine'
+import { PendulumStrum } from './PendulumStrum'
 
 export function TransportBar() {
   const tempo = useSettingsStore((s) => s.tempo)
@@ -15,8 +16,10 @@ export function TransportBar() {
   }
 
   return (
-    <div className="border-t border-line bg-raised px-4 py-3">
-      <div className="mx-auto flex max-w-lg items-center gap-4">
+    <div className="border-t border-line bg-raised px-4 pb-3 pt-1">
+      <div className="mx-auto max-w-lg">
+        <PendulumStrum />
+        <div className="flex items-center gap-4">
         <button
           type="button"
           onClick={() => void onPlayToggle()}
@@ -50,6 +53,7 @@ export function TransportBar() {
             onChange={(e) => setTempo(Number(e.target.value))}
             className="tempo-slider h-8 w-full cursor-pointer appearance-none bg-transparent"
           />
+        </div>
         </div>
       </div>
 

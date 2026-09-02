@@ -36,6 +36,7 @@ export class MetronomeEngine {
   private wakeTimer: number | null = null
   private running = false
   private generation = 0
+  private originTime = 0
   private visualRaf: number | null = null
   private pendingVisuals: BeatEvent[] = []
   private onBeat: VisualHandler | null = null
@@ -73,6 +74,7 @@ export class MetronomeEngine {
       beat: 0,
       slot: 0,
     }
+    this.originTime = this.cursor.time
     this.pendingVisuals = []
     this.running = true
     this.scheduler()
@@ -96,6 +98,11 @@ export class MetronomeEngine {
     }
     this.pendingVisuals = []
     this.cursor = null
+  }
+
+  getPosition(): { currentTime: number; originTime: number } | null {
+    if (!this.running || !this.ctx) return null
+    return { currentTime: this.ctx.currentTime, originTime: this.originTime }
   }
 
   dispose(): void {
