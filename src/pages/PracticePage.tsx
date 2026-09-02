@@ -1,9 +1,24 @@
 import { BeatToggles } from '../components/BeatToggles'
 import { MetronomeControls } from '../components/MetronomeControls'
+import { MicOnboarding } from '../components/MicOnboarding'
 import { PatternPicker } from '../components/PatternPicker'
 import { StrumPatternDisplay } from '../components/StrumPatternDisplay'
+import { TunerView } from '../components/TunerView'
+import { useSessionStore } from '../stores/sessionStore'
 
 export function PracticePage() {
+  const onboarded = useSessionStore((s) => s.micOnboarded)
+  const gateOpen = useSessionStore((s) => s.practiceGateOpen)
+  const setMicOnboarded = useSessionStore((s) => s.setMicOnboarded)
+
+  if (!onboarded) {
+    return <MicOnboarding onContinue={() => setMicOnboarded(true)} />
+  }
+
+  if (!gateOpen) {
+    return <TunerView mode="gate" />
+  }
+
   return (
     <section className="space-y-6">
       <div className="space-y-2">

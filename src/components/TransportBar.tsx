@@ -1,14 +1,22 @@
 import { MAX_TEMPO, MIN_TEMPO, useSettingsStore } from '../stores/settingsStore'
+import { useSessionStore } from '../stores/sessionStore'
 import { metronomeEngine } from '../audio/metronomeEngine'
 import { PendulumStrum } from './PendulumStrum'
+import { useLocation } from 'react-router-dom'
 
 export function TransportBar() {
   const tempo = useSettingsStore((s) => s.tempo)
   const isPlaying = useSettingsStore((s) => s.isPlaying)
   const setTempo = useSettingsStore((s) => s.setTempo)
   const togglePlaying = useSettingsStore((s) => s.togglePlaying)
+  const gateOpen = useSessionStore((s) => s.practiceGateOpen)
+  const onboarded = useSessionStore((s) => s.micOnboarded)
+  const location = useLocation()
+  const playAllowed =
+    onboarded && gateOpen && location.pathname !== '/tuner'
 
   async function onPlayToggle() {
+    if (!playAllowed) return
     if (!isPlaying) {
       await metronomeEngine.unlock()
     }
@@ -25,11 +33,14 @@ export function TransportBar() {
           onClick={() => void onPlayToggle()}
           aria-pressed={isPlaying}
           aria-label={isPlaying ? 'Stop' : 'Play'}
+          aria-disabled={!playAllowed}
           className={[
             'flex h-14 w-14 shrink-0 items-center justify-center rounded-full transition-colors',
-            isPlaying
-              ? 'bg-amber text-bg'
-              : 'bg-surface text-ink ring-1 ring-line',
+            !playAllowed
+              ? 'bg-surface text-off ring-1 ring-line'
+              : isPlaying
+                ? 'bg-amber text-bg'
+                : 'bg-surface text-ink ring-1 ring-line',
           ].join(' ')}
         >
           {isPlaying ? <StopGlyph /> : <PlayGlyph />}

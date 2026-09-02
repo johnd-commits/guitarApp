@@ -5,6 +5,7 @@ import {
   type PlannedClick,
   type SchedulerConfig,
 } from './timing'
+import { getAudioContext, resumeAudioContext } from './context'
 
 const LOOKAHEAD_MS = 25
 const SCHEDULE_AHEAD_S = 0.1
@@ -30,7 +31,6 @@ function clickPeak(click: PlannedClick): number {
  * Click synthesis is oscillator + envelope, scheduled on the audio clock.
  */
 export class MetronomeEngine {
-  private ctx: AudioContext | null = null
   private config: SchedulerConfig | null = null
   private cursor: GridCursor | null = null
   private wakeTimer: number | null = null
@@ -40,7 +40,6 @@ export class MetronomeEngine {
   private visualRaf: number | null = null
   private pendingVisuals: BeatEvent[] = []
   private onBeat: VisualHandler | null = null
-  private visibilityHandler: (() => void) | null = null
 
   setConfig(config: SchedulerConfig) {
     this.config = config
@@ -55,10 +54,7 @@ export class MetronomeEngine {
    * Also used on visibilitychange to recover from background suspend.
    */
   async unlock(): Promise<void> {
-    const ctx = this.ensureContext()
-    if (ctx.state === 'suspended') {
-      await ctx.resume()
-    }
+    await resumeAudioContext()
   }
 
   async start(): Promise<void> {
@@ -66,7 +62,7 @@ export class MetronomeEngine {
     this.halt()
     await this.unlock()
     if (generation !== this.generation || !this.config) return
-    const ctx = this.ensureContext()
+    const ctx = getAudioContext()
 
     this.cursor = {
       time: ctx.currentTime + START_DELAY_S,
@@ -101,37 +97,20 @@ export class MetronomeEngine {
   }
 
   getPosition(): { currentTime: number; originTime: number } | null {
-    if (!this.running || !this.ctx) return null
-    return { currentTime: this.ctx.currentTime, originTime: this.originTime }
+    if (!this.running) return null
+    const ctx = getAudioContext()
+    return { currentTime: ctx.currentTime, originTime: this.originTime }
   }
 
   dispose(): void {
     this.stop()
-    if (this.visibilityHandler) {
-      document.removeEventListener('visibilitychange', this.visibilityHandler)
-      this.visibilityHandler = null
-    }
-    void this.ctx?.close()
-    this.ctx = null
-  }
-
-  private ensureContext(): AudioContext {
-    if (!this.ctx) {
-      this.ctx = new AudioContext()
-      this.visibilityHandler = () => {
-        if (document.visibilityState === 'visible' && this.ctx?.state === 'suspended') {
-          void this.ctx.resume()
-        }
-      }
-      document.addEventListener('visibilitychange', this.visibilityHandler)
-    }
-    return this.ctx
   }
 
   private scheduler = (): void => {
-    if (!this.running || !this.ctx || !this.config || !this.cursor) return
+    if (!this.running || !this.config || !this.cursor) return
+    const ctx = getAudioContext()
 
-    const horizon = this.ctx.currentTime + SCHEDULE_AHEAD_S
+    const horizon = ctx.currentTime + SCHEDULE_AHEAD_S
     while (this.cursor.time < horizon) {
       const click = describeClick(this.cursor, this.config)
       if (click.audible) this.scheduleClick(click)
@@ -143,8 +122,8 @@ export class MetronomeEngine {
   }
 
   private visualTick = (): void => {
-    if (!this.running || !this.ctx) return
-    const now = this.ctx.currentTime
+    if (!this.running) return
+    const now = getAudioContext().currentTime
     while (this.pendingVisuals.length > 0 && this.pendingVisuals[0].time <= now) {
       const event = this.pendingVisuals.shift()
       if (event) this.onBeat?.(event)
@@ -153,8 +132,7 @@ export class MetronomeEngine {
   }
 
   private scheduleClick(click: PlannedClick): void {
-    const ctx = this.ctx
-    if (!ctx) return
+    const ctx = getAudioContext()
 
     const osc = ctx.createOscillator()
     const gain = ctx.createGain()
