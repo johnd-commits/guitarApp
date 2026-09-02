@@ -1,0 +1,24 @@
+This project is Fretwise, a browser guitar coach for adult beginners who cannot
+read music. Non-negotiable constraints:
+
+- NEVER render standard notation or tablature staves. Everything is visual:
+  chord diagrams, moving beat indicators, colour, animation.
+- The user knows open chords but struggles with strumming and chord changes.
+  Never condescend. No streaks, no badges, no guilt.
+- Feedback is descriptive and specific, never evaluative. "You're landing about
+  40ms early" not "Wrong" or "Score: 62%". No red X marks. No failure states.
+  Never emit generic encouragement ("great job", "keep it up"). Every statement
+  must cite a measured number.
+- Audio timing must be sample-accurate via AudioContext scheduling.
+  NEVER use setInterval or setTimeout for musical timing.
+- All DSP runs in AudioWorklets, never on the main thread.
+- Every exercise has a tempo control that goes down to 40 BPM.
+- Mic audio is processed locally. Audio is never uploaded without explicit
+  per-recording opt-in.
+
+Stack: Vite + React + TypeScript, Tailwind, Zustand, Vitest, React Router.
+Libraries: pitchy, svguitar, tonal, dexie, chordsheetjs.
+Deployment: Vercel, static SPA, output dir dist.
+
+Code style: DSP as small pure functions, unit tested in isolation against
+fixture arrays — never tested by ear. Comment the maths in plain English.

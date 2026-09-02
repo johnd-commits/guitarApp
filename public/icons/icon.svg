@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Fretwise">
+  <rect width="512" height="512" fill="#1a1814"/>
+  <path fill="#e8a838" d="M256 64c48 0 118 86 118 176 0 92-52 176-118 208C190 416 138 332 138 240 138 150 208 64 256 64z"/>
+  <rect x="246" y="168" width="20" height="176" rx="6" fill="#f3efe6"/>
+</svg>
