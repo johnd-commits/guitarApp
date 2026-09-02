@@ -1,4 +1,5 @@
 import { BeatToggles } from '../components/BeatToggles'
+import { ChordFollow } from '../components/ChordFollow'
 import { MetronomeControls } from '../components/MetronomeControls'
 import { MicOnboarding } from '../components/MicOnboarding'
 import { PatternPicker } from '../components/PatternPicker'
@@ -27,11 +28,12 @@ export function PracticePage() {
           Keep the arm moving
         </h1>
         <p className="text-muted">
-          Mute clicks on 1 and 3 and watch the pendulum. Ghosted arrows are
-          MISS slots — the arm still travels, the strings are not struck.
+          Strum arrows and the neck move together. The next chord is previewed
+          before the change — let the arm keep going even if the shape is late.
         </p>
       </div>
 
+      <ChordFollow />
       <StrumPatternDisplay />
       <PatternPicker />
       <BeatToggles />

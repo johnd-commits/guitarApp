@@ -73,7 +73,7 @@ function SlotGlyph({ slot, active }: { slot: StrumSlot; active: boolean }) {
       <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true">
         <path
           d="M6 6 L18 18 M18 6 L6 18"
-          stroke={active ? 'currentColor' : '#8b9caf'}
+          stroke={active ? 'currentColor' : 'var(--color-off)'}
           strokeWidth="2.4"
           strokeLinecap="round"
         />
@@ -82,7 +82,7 @@ function SlotGlyph({ slot, active }: { slot: StrumSlot; active: boolean }) {
   }
 
   const faded = slot.kind === 'MISS'
-  const color = active ? 'currentColor' : faded ? '#8b9caf' : '#f3efe6'
+  const color = active ? 'currentColor' : faded ? 'var(--color-off)' : 'var(--color-ink)'
   const pointingDown = slot.direction === 'DOWN'
 
   return (

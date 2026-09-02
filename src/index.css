@@ -1,15 +1,15 @@
 @import 'tailwindcss';
 
 @theme {
-  --color-bg: #1a1814;
-  --color-surface: #24211c;
-  --color-raised: #2e2a24;
-  --color-line: #3d3830;
-  --color-amber: #e8a838;
-  --color-amber-dim: #b8872c;
-  --color-off: #8b9caf;
-  --color-ink: #f3efe6;
-  --color-muted: #a89f91;
+  --color-bg: #332014;
+  --color-surface: #4a2e1c;
+  --color-raised: #5c3a24;
+  --color-line: #7a5336;
+  --color-amber: #ffc14d;
+  --color-amber-dim: #f0a322;
+  --color-off: #7ec8e0;
+  --color-ink: #fff6ea;
+  --color-muted: #e0c8ae;
   --font-sans: 'Source Sans 3', 'Segoe UI', system-ui, sans-serif;
   --font-display: 'Fraunces', Georgia, serif;
 }
@@ -21,7 +21,9 @@ html {
 body {
   margin: 0;
   min-height: 100dvh;
-  background: var(--color-bg);
+  background:
+    radial-gradient(90% 50% at 50% -8%, #5a3318 0%, transparent 58%),
+    var(--color-bg);
   color: var(--color-ink);
   font-family: var(--font-sans);
   font-size: 1rem;
@@ -31,10 +33,53 @@ body {
 
 #root {
   min-height: 100dvh;
+  background:
+    radial-gradient(85% 48% at 50% -6%, #8a4e22 0%, transparent 62%),
+    var(--color-bg);
 }
 
 button,
 input,
 select {
   font: inherit;
+}
+
+.tempo-slider {
+  accent-color: var(--color-amber);
+}
+
+.tempo-slider::-webkit-slider-runnable-track {
+  height: 6px;
+  border-radius: 999px;
+  background: var(--color-line);
+}
+
+.tempo-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 22px;
+  height: 22px;
+  margin-top: -8px;
+  border-radius: 999px;
+  background: var(--color-amber);
+}
+
+.tempo-slider::-moz-range-track {
+  height: 6px;
+  border-radius: 999px;
+  background: var(--color-line);
+}
+
+.tempo-slider::-moz-range-thumb {
+  width: 22px;
+  height: 22px;
+  border: none;
+  border-radius: 999px;
+  background: var(--color-amber);
+}
+
+.chord-diagram svg {
+  display: block;
+  width: 100%;
+  height: auto;
 }

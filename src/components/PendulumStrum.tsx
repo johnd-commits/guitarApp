@@ -35,7 +35,7 @@ export function PendulumStrum() {
       if (fillRef.current) {
         fillRef.current.setAttribute(
           'fill',
-          downness > 0.5 ? '#e8a838' : '#8b9caf',
+          downness > 0.5 ? 'var(--color-amber)' : 'var(--color-off)',
         )
       }
       raf = requestAnimationFrame(tick)
@@ -47,12 +47,12 @@ export function PendulumStrum() {
   return (
     <div className="flex flex-col items-center pb-1 pt-2" aria-hidden="true">
       <svg width="120" height="88" viewBox="0 0 120 88" className="overflow-visible">
-        <circle cx="60" cy="28" r="5" fill="#a89f91" />
+        <circle cx="60" cy="28" r="5" fill="var(--color-muted)" />
         <g ref={armRef} transform="rotate(-48 60 28)">
           <path
             ref={fillRef}
             d="M60 22 L70 58 L60 78 L50 58 Z"
-            fill="#8b9caf"
+            fill="var(--color-off)"
           />
         </g>
       </svg>

@@ -49,6 +49,8 @@ describe('app shell', () => {
     expect(
       screen.getByRole('heading', { name: /keep the arm moving/i }),
     ).toBeInTheDocument()
+    expect(screen.getByText('Now')).toBeInTheDocument()
+    expect(screen.getByText('Next')).toBeInTheDocument()
   })
 
   it('sends an onboarded session through the tuner gate', () => {

@@ -67,38 +67,6 @@ export function TransportBar() {
         </div>
         </div>
       </div>
-
-      <style>{`
-        .tempo-slider {
-          accent-color: #e8a838;
-        }
-        .tempo-slider::-webkit-slider-runnable-track {
-          height: 6px;
-          border-radius: 999px;
-          background: #3d3830;
-        }
-        .tempo-slider::-webkit-slider-thumb {
-          -webkit-appearance: none;
-          appearance: none;
-          width: 22px;
-          height: 22px;
-          margin-top: -8px;
-          border-radius: 999px;
-          background: #e8a838;
-        }
-        .tempo-slider::-moz-range-track {
-          height: 6px;
-          border-radius: 999px;
-          background: #3d3830;
-        }
-        .tempo-slider::-moz-range-thumb {
-          width: 22px;
-          height: 22px;
-          border: none;
-          border-radius: 999px;
-          background: #e8a838;
-        }
-      `}</style>
     </div>
   )
 }
