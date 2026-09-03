@@ -61,7 +61,7 @@ export function ChordDiagram({ chord, state, anchors = [], capoFret, sounding }:
           tuningsFontSize: 18,
           fretLabelFontSize: 16,
         })
-        .chord({
+          .chord({
           title: '',
           position: chord.position,
           fingers: chord.fingers.map((f) => {

@@ -1,3 +1,4 @@
+import { CapoHelper } from '../components/CapoHelper'
 import { LatencyCalibrate } from '../components/LatencyCalibrate'
 import { useSettingsStore } from '../stores/settingsStore'
 
@@ -79,6 +80,8 @@ export function SettingsPage() {
           className="h-8 w-full cursor-pointer accent-amber"
         />
       </label>
+
+      <CapoHelper />
 
       <LatencyCalibrate />
 

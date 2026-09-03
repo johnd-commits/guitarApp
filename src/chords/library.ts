@@ -104,6 +104,102 @@ export const CHORD_LIBRARY: ChordShape[] = [
     { string: 2, fret: 3, finger: 3 },
     { string: 1, fret: 1, finger: 1 },
   ]),
+  shape('E7', 'E7', [
+    { string: 6, fret: 0 },
+    { string: 5, fret: 2, finger: 2 },
+    { string: 4, fret: 0 },
+    { string: 3, fret: 1, finger: 1 },
+    { string: 2, fret: 0 },
+    { string: 1, fret: 0 },
+  ]),
+  shape('A7', 'A7', [
+    { string: 6, fret: 'x' },
+    { string: 5, fret: 0 },
+    { string: 4, fret: 2, finger: 2 },
+    { string: 3, fret: 0 },
+    { string: 2, fret: 2, finger: 3 },
+    { string: 1, fret: 0 },
+  ]),
+  shape('D7', 'D7', [
+    { string: 6, fret: 'x' },
+    { string: 5, fret: 'x' },
+    { string: 4, fret: 0 },
+    { string: 3, fret: 2, finger: 1 },
+    { string: 2, fret: 1, finger: 2 },
+    { string: 1, fret: 2, finger: 3 },
+  ]),
+  shape('G7', 'G7', [
+    { string: 6, fret: 3, finger: 3 },
+    { string: 5, fret: 2, finger: 2 },
+    { string: 4, fret: 0 },
+    { string: 3, fret: 0 },
+    { string: 2, fret: 0 },
+    { string: 1, fret: 1, finger: 1 },
+  ]),
+  shape('C7', 'C7', [
+    { string: 6, fret: 'x' },
+    { string: 5, fret: 3, finger: 3 },
+    { string: 4, fret: 2, finger: 2 },
+    { string: 3, fret: 3, finger: 4 },
+    { string: 2, fret: 1, finger: 1 },
+    { string: 1, fret: 0 },
+  ]),
+  shape('B7', 'B7', [
+    { string: 6, fret: 'x' },
+    { string: 5, fret: 2, finger: 2 },
+    { string: 4, fret: 1, finger: 1 },
+    { string: 3, fret: 2, finger: 3 },
+    { string: 2, fret: 0 },
+    { string: 1, fret: 2, finger: 4 },
+  ]),
+  shape('Em7', 'Em7', [
+    { string: 6, fret: 0 },
+    { string: 5, fret: 2, finger: 2 },
+    { string: 4, fret: 0 },
+    { string: 3, fret: 0 },
+    { string: 2, fret: 0 },
+    { string: 1, fret: 0 },
+  ]),
+  shape('Am7', 'Am7', [
+    { string: 6, fret: 'x' },
+    { string: 5, fret: 0 },
+    { string: 4, fret: 2, finger: 2 },
+    { string: 3, fret: 0 },
+    { string: 2, fret: 1, finger: 1 },
+    { string: 1, fret: 0 },
+  ]),
+  shape('Dsus2', 'Dsus2', [
+    { string: 6, fret: 'x' },
+    { string: 5, fret: 'x' },
+    { string: 4, fret: 0 },
+    { string: 3, fret: 2, finger: 1 },
+    { string: 2, fret: 3, finger: 3 },
+    { string: 1, fret: 0 },
+  ]),
+  shape('Dsus4', 'Dsus4', [
+    { string: 6, fret: 'x' },
+    { string: 5, fret: 'x' },
+    { string: 4, fret: 0 },
+    { string: 3, fret: 2, finger: 1 },
+    { string: 2, fret: 3, finger: 3 },
+    { string: 1, fret: 3, finger: 4 },
+  ]),
+  shape('Asus2', 'Asus2', [
+    { string: 6, fret: 'x' },
+    { string: 5, fret: 0 },
+    { string: 4, fret: 2, finger: 2 },
+    { string: 3, fret: 2, finger: 3 },
+    { string: 2, fret: 0 },
+    { string: 1, fret: 0 },
+  ]),
+  shape('Asus4', 'Asus4', [
+    { string: 6, fret: 'x' },
+    { string: 5, fret: 0 },
+    { string: 4, fret: 2, finger: 1 },
+    { string: 3, fret: 2, finger: 2 },
+    { string: 2, fret: 3, finger: 4 },
+    { string: 1, fret: 0 },
+  ]),
 ]
 
 export function chordById(id: string): ChordShape {
@@ -112,7 +208,7 @@ export function chordById(id: string): ChordShape {
 
 const NOTES = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B']
 
-function parseRoot(name: string): { root: string; rest: string } {
+export function parseRoot(name: string): { root: string; rest: string } {
   if (name.startsWith('C#') || name.startsWith('D#') || name.startsWith('F#') || name.startsWith('G#') || name.startsWith('A#')) {
     return { root: name.slice(0, 2), rest: name.slice(2) }
   }

@@ -1,4 +1,5 @@
 import { BeatToggles } from '../components/BeatToggles'
+import { ChangeTrainer } from '../components/ChangeTrainer'
 import { ChordFollow } from '../components/ChordFollow'
 import { MetronomeControls } from '../components/MetronomeControls'
 import { MicOnboarding } from '../components/MicOnboarding'
@@ -6,8 +7,10 @@ import { PatternPicker } from '../components/PatternPicker'
 import { StrumScope } from '../components/StrumScope'
 import { TunerView } from '../components/TunerView'
 import { useOnsetCapture } from '../hooks/useOnsetCapture'
+import { useChangeTrainerStore } from '../stores/changeTrainerStore'
 import { useSessionStore } from '../stores/sessionStore'
 import { useSettingsStore } from '../stores/settingsStore'
+import { useState } from 'react'
 
 export function PracticePage() {
   const onboarded = useSessionStore((s) => s.micOnboarded)
@@ -15,6 +18,8 @@ export function PracticePage() {
   const setMicOnboarded = useSessionStore((s) => s.setMicOnboarded)
   const isPlaying = useSettingsStore((s) => s.isPlaying)
   useOnsetCapture(onboarded && gateOpen && isPlaying)
+  const noStrum = useChangeTrainerStore((s) => s.noStrum)
+  const [mode, setMode] = useState<'follow' | 'changes'>('follow')
 
   if (!onboarded) {
     return <MicOnboarding onContinue={() => setMicOnboarded(true)} />
@@ -37,9 +42,32 @@ export function PracticePage() {
         </p>
       </div>
 
-      <ChordFollow />
-      <StrumScope />
-      <PatternPicker />
+      <div className="grid grid-cols-2 gap-2">
+        <button
+          type="button"
+          onClick={() => setMode('follow')}
+          className={[
+            'min-h-12 rounded-2xl font-medium',
+            mode === 'follow' ? 'bg-amber text-bg' : 'bg-surface text-ink',
+          ].join(' ')}
+        >
+          Follow
+        </button>
+        <button
+          type="button"
+          onClick={() => setMode('changes')}
+          className={[
+            'min-h-12 rounded-2xl font-medium',
+            mode === 'changes' ? 'bg-amber text-bg' : 'bg-surface text-ink',
+          ].join(' ')}
+        >
+          Changes
+        </button>
+      </div>
+
+      {mode === 'follow' ? <ChordFollow /> : <ChangeTrainer />}
+      {!noStrum ? <StrumScope /> : null}
+      {mode === 'follow' || !noStrum ? <PatternPicker /> : null}
       <BeatToggles />
       <MetronomeControls />
     </section>
