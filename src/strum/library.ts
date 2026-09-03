@@ -17,7 +17,7 @@ export const PATTERN_LIBRARY: StrumPattern[] = [
   patternFromKinds('one-drop-skank', 'One-drop skank', 'eighth', [M, M, H, M, M, M, H, M]),
 ]
 
-export const DEFAULT_PATTERN_ID = 'all-downs'
+export const DEFAULT_PATTERN_ID = 'd-du-udu'
 
 export function patternById(id: string): StrumPattern {
   return PATTERN_LIBRARY.find((p) => p.id === id) ?? PATTERN_LIBRARY[0]

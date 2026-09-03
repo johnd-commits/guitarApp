@@ -29,16 +29,23 @@ export function beatPhaseAt(elapsed: number, tempo: number): number {
   return beats - Math.floor(beats)
 }
 
+export type PatternPlayhead = {
+  /** Slot index inside the pattern (MISS and MUTE still count). */
+  index: number
+  /** 0 at the start of that slot, 1 at the end. */
+  phase: number
+}
+
 /**
- * Which pattern slot is "now", using the same swing split as the metronome.
- * MISS slots still occupy time — the current index moves through them.
+ * Continuous position on the strum lane, using the same swing split as
+ * the metronome. MISS slots still occupy time so the playhead never jumps.
  */
-export function currentPatternSlot(
+export function patternPlayhead(
   elapsed: number,
   pattern: StrumPattern,
   config: Pick<SchedulerConfig, 'tempo' | 'timeSignature' | 'swing'>,
-): number {
-  if (elapsed < 0 || pattern.slots.length === 0) return 0
+): PatternPlayhead {
+  if (elapsed < 0 || pattern.slots.length === 0) return { index: 0, phase: 0 }
 
   const bpb = beatsPerBar(config.timeSignature)
   const slotsPerBeat = pattern.resolution === 'eighth' ? 2 : 4
@@ -59,9 +66,24 @@ export function currentPatternSlot(
       },
       slotInBeat,
     )
-    if (timeInBar < t + duration) return i % pattern.slots.length
+    if (timeInBar < t + duration) {
+      const phase = duration > 0 ? (timeInBar - t) / duration : 0
+      return { index: i % pattern.slots.length, phase }
+    }
     t += duration
   }
 
-  return (barSlots - 1) % pattern.slots.length
+  return { index: (barSlots - 1) % pattern.slots.length, phase: 1 }
+}
+
+/**
+ * Which pattern slot is "now", using the same swing split as the metronome.
+ * MISS slots still occupy time — the current index moves through them.
+ */
+export function currentPatternSlot(
+  elapsed: number,
+  pattern: StrumPattern,
+  config: Pick<SchedulerConfig, 'tempo' | 'timeSignature' | 'swing'>,
+): number {
+  return patternPlayhead(elapsed, pattern, config).index
 }

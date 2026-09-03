@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { currentPatternSlot, longFraction, pendulumNorm } from './motion'
+import { currentPatternSlot, longFraction, patternPlayhead, pendulumNorm } from './motion'
 import { PATTERN_LIBRARY } from './library'
 import { patternFromKinds } from './types'
 
@@ -47,5 +47,25 @@ describe('pattern slot cursor', () => {
     expect(currentPatternSlot(0.25, pattern, config)).toBe(0)
     expect(currentPatternSlot(0.5, pattern, config)).toBe(1)
     expect(currentPatternSlot(1.0, pattern, config)).toBe(2)
+  })
+
+  it('reports a continuous phase so the playhead can slide, not jump', () => {
+    const pattern = patternFromKinds('test', 'test', 'eighth', [
+      'HIT',
+      'MISS',
+      'HIT',
+      'MISS',
+      'HIT',
+      'MISS',
+      'HIT',
+      'MISS',
+    ])
+    const config = { tempo: 60, timeSignature: '4/4' as const, swing: 0 }
+    // 60 BPM, straight eighths → each slot is 0.5s.
+    expect(patternPlayhead(0.0, pattern, config)).toEqual({ index: 0, phase: 0 })
+    expect(patternPlayhead(0.25, pattern, config).index).toBe(0)
+    expect(patternPlayhead(0.25, pattern, config).phase).toBeCloseTo(0.5, 8)
+    expect(patternPlayhead(0.5, pattern, config).index).toBe(1)
+    expect(patternPlayhead(0.5, pattern, config).phase).toBeCloseTo(0, 8)
   })
 })

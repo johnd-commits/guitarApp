@@ -9,6 +9,14 @@ import {
 } from './library'
 
 describe('chord follow-along', () => {
+  it('walks D then Dm on successive bars', () => {
+    const p = progressionById('d-dm')
+    expect(chordIndexAtBar(0, p).currentIndex).toBe(0)
+    expect(chordIndexAtBar(0, p).nextIndex).toBe(1)
+    expect(chordIndexAtBar(1, p).currentIndex).toBe(1)
+    expect(chordIndexAtBar(2, p).currentIndex).toBe(0)
+  })
+
   it('walks G then C on successive bars', () => {
     const p = progressionById('g-c')
     expect(chordIndexAtBar(0, p).currentIndex).toBe(0)
@@ -31,6 +39,11 @@ describe('chord follow-along', () => {
 
   it('marks G-to-C as having no shared fretted finger', () => {
     expect(anchorFingers(chordById('G'), chordById('C'))).toHaveLength(0)
+  })
+
+  it('keeps D-to-Dm ring finger on the B string, third fret', () => {
+    const anchors = anchorFingers(chordById('D'), chordById('Dm'))
+    expect(anchors.some((a) => a.string === 2 && a.fret === 3)).toBe(true)
   })
 
   it('marks E-to-Em index finger leaving while 2 and 3 stay', () => {

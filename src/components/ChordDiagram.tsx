@@ -89,7 +89,7 @@ export function ChordDiagram({ chord, state, anchors = [], capoFret, sounding }:
   }, [chord, state, anchors])
 
   const shapeLabel =
-    capoFret > 0 ? `Play ${chord.name} shape, sounds as ${sounding}` : `${chord.name} shape`
+    capoFret > 0 ? `Play ${chord.name} shape, sounds as ${sounding}` : null
 
   return (
     <figure
@@ -99,11 +99,13 @@ export function ChordDiagram({ chord, state, anchors = [], capoFret, sounding }:
         state === 'upcoming' ? 'ring-2 ring-off' : '',
       ].join(' ')}
     >
-      <figcaption className="px-2 pb-1">
-        <p className="font-display text-2xl leading-tight">{chord.name}</p>
-        <p className="text-sm text-muted">{shapeLabel}</p>
+      <div ref={hostRef} className="chord-diagram mx-auto w-full max-w-[160px]" />
+      <figcaption className="px-2 pt-1 text-center">
+        <p className="font-display text-2xl font-semibold uppercase tracking-wide text-amber">
+          {chord.name} chord
+        </p>
+        {shapeLabel ? <p className="text-sm text-muted">{shapeLabel}</p> : null}
       </figcaption>
-      <div ref={hostRef} className="chord-diagram mx-auto w-full max-w-[200px]" />
     </figure>
   )
 }

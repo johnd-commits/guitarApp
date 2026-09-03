@@ -51,6 +51,11 @@ describe('app shell', () => {
     ).toBeInTheDocument()
     expect(screen.getByText('Now')).toBeInTheDocument()
     expect(screen.getByText('Next')).toBeInTheDocument()
+    expect(screen.getByText('Switch')).toBeInTheDocument()
+    expect(screen.getByText(/D chord/i)).toBeInTheDocument()
+    expect(screen.getByText(/Dm chord/i)).toBeInTheDocument()
+    expect(screen.getAllByText('DOWN').length).toBeGreaterThan(0)
+    expect(screen.getAllByText('UP').length).toBeGreaterThan(0)
   })
 
   it('sends an onboarded session through the tuner gate', () => {

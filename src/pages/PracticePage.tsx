@@ -3,7 +3,6 @@ import { ChordFollow } from '../components/ChordFollow'
 import { MetronomeControls } from '../components/MetronomeControls'
 import { MicOnboarding } from '../components/MicOnboarding'
 import { PatternPicker } from '../components/PatternPicker'
-import { StrumPatternDisplay } from '../components/StrumPatternDisplay'
 import { TunerView } from '../components/TunerView'
 import { useSessionStore } from '../stores/sessionStore'
 
@@ -28,13 +27,12 @@ export function PracticePage() {
           Keep the arm moving
         </h1>
         <p className="text-muted">
-          Strum arrows and the neck move together. The next chord is previewed
-          before the change — let the arm keep going even if the shape is late.
+          Two necks, then a moving pick on the DOWN / UP arrows. Switch lights
+          1.0 beat before the change — let the arm keep going even if the shape is late.
         </p>
       </div>
 
       <ChordFollow />
-      <StrumPatternDisplay />
       <PatternPicker />
       <BeatToggles />
       <MetronomeControls />

@@ -8,6 +8,9 @@
   --color-amber: #ffc14d;
   --color-amber-dim: #f0a322;
   --color-off: #7ec8e0;
+  --color-down: #2f6b3a;
+  --color-up: #6fcfba;
+  --color-switch: #e23b3b;
   --color-ink: #fff6ea;
   --color-muted: #e0c8ae;
   --font-sans: 'Source Sans 3', 'Segoe UI', system-ui, sans-serif;
@@ -82,4 +85,31 @@ select {
   display: block;
   width: 100%;
   height: auto;
+}
+
+.strum-lane {
+  background: var(--color-ink);
+  color: var(--color-bg);
+}
+
+.strum-playhead {
+  pointer-events: none;
+  will-change: transform;
+}
+
+[data-glyph] {
+  will-change: transform;
+}
+
+.strum-slot[data-active='true'] {
+  filter: drop-shadow(0 0 6px rgb(255 193 77 / 0.55));
+}
+
+.switch-cue[data-hot='true'] {
+  color: var(--color-switch);
+}
+
+.switch-cue[data-hot='false'] {
+  color: var(--color-muted);
+  opacity: 0.65;
 }

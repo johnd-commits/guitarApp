@@ -137,13 +137,14 @@ export type ChordProgression = {
 }
 
 export const PROGRESSIONS: ChordProgression[] = [
+  { id: 'd-dm', name: 'D – Dm', chordIds: ['D', 'Dm'], barsPerChord: 1 },
   { id: 'g-c', name: 'G – C', chordIds: ['G', 'C'], barsPerChord: 1 },
   { id: 'g-c-d-em', name: 'G – C – D – Em', chordIds: ['G', 'C', 'D', 'Em'], barsPerChord: 1 },
   { id: 'am-g-f-c', name: 'Am – G – F – C', chordIds: ['Am', 'G', 'F', 'C'], barsPerChord: 1 },
   { id: 'd-a-g', name: 'D – A – G', chordIds: ['D', 'A', 'G'], barsPerChord: 1 },
 ]
 
-export const DEFAULT_PROGRESSION_ID = 'g-c'
+export const DEFAULT_PROGRESSION_ID = 'd-dm'
 
 export function progressionById(id: string): ChordProgression {
   return PROGRESSIONS.find((p) => p.id === id) ?? PROGRESSIONS[0]
