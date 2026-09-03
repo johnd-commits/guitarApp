@@ -3,13 +3,18 @@ import { ChordFollow } from '../components/ChordFollow'
 import { MetronomeControls } from '../components/MetronomeControls'
 import { MicOnboarding } from '../components/MicOnboarding'
 import { PatternPicker } from '../components/PatternPicker'
+import { StrumScope } from '../components/StrumScope'
 import { TunerView } from '../components/TunerView'
+import { useOnsetCapture } from '../hooks/useOnsetCapture'
 import { useSessionStore } from '../stores/sessionStore'
+import { useSettingsStore } from '../stores/settingsStore'
 
 export function PracticePage() {
   const onboarded = useSessionStore((s) => s.micOnboarded)
   const gateOpen = useSessionStore((s) => s.practiceGateOpen)
   const setMicOnboarded = useSessionStore((s) => s.setMicOnboarded)
+  const isPlaying = useSettingsStore((s) => s.isPlaying)
+  useOnsetCapture(onboarded && gateOpen && isPlaying)
 
   if (!onboarded) {
     return <MicOnboarding onContinue={() => setMicOnboarded(true)} />
@@ -33,6 +38,7 @@ export function PracticePage() {
       </div>
 
       <ChordFollow />
+      <StrumScope />
       <PatternPicker />
       <BeatToggles />
       <MetronomeControls />

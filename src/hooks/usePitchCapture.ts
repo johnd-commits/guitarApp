@@ -65,7 +65,7 @@ export function usePitchCapture(enabled: boolean) {
 
     void (async () => {
       try {
-        await micCapture.start(onFrame)
+        await micCapture.start({ pitch: onFrame })
         if (cancelled) {
           micCapture.stop()
           return

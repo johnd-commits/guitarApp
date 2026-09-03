@@ -5,32 +5,34 @@ import tailwindcss from '@tailwindcss/vite'
 import { VitePWA } from 'vite-plugin-pwa'
 import * as esbuild from 'esbuild'
 
-function pitchWorkletPlugin(): Plugin {
+function workletPlugin(virtualName: string, entry: string): Plugin {
+  const virtual = `virtual:${virtualName}`
+  const resolved = `\0${virtual}`
   return {
-    name: 'pitch-worklet',
+    name: `${virtualName}-worklet`,
     resolveId(id) {
-      if (id === 'virtual:pitch-processor') return '\0virtual:pitch-processor'
+      if (id === virtual) return resolved
       return null
     },
     async load(id) {
-      if (id !== '\0virtual:pitch-processor') return null
+      if (id !== resolved) return null
       const result = await esbuild.build({
-        entryPoints: ['src/audio/worklets/pitch-processor.ts'],
+        entryPoints: [entry],
         bundle: true,
         format: 'iife',
         write: false,
         platform: 'browser',
         target: 'es2022',
       })
-      const code = result.outputFiles[0].text
-      return `export default ${JSON.stringify(code)}`
+      return `export default ${JSON.stringify(result.outputFiles[0].text)}`
     },
   }
 }
 
 export default defineConfig({
   plugins: [
-    pitchWorkletPlugin(),
+    workletPlugin('pitch-processor', 'src/audio/worklets/pitch-processor.ts'),
+    workletPlugin('onset-processor', 'src/audio/worklets/onset-processor.ts'),
     react(),
     tailwindcss(),
     VitePWA({

@@ -56,6 +56,7 @@ describe('app shell', () => {
     expect(screen.getByText(/Dm chord/i)).toBeInTheDocument()
     expect(screen.getAllByText('DOWN').length).toBeGreaterThan(0)
     expect(screen.getAllByText('UP').length).toBeGreaterThan(0)
+    expect(screen.getByText(/StrumScope/i)).toBeInTheDocument()
   })
 
   it('sends an onboarded session through the tuner gate', () => {

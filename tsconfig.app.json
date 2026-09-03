@@ -20,5 +20,5 @@
     "noUncheckedSideEffectImports": true
   },
   "include": ["src"],
-  "exclude": ["src/audio/worklets"]
+  "exclude": ["src/audio/worklets", "src/**/*.test.ts", "src/**/*.test.tsx"]
 }

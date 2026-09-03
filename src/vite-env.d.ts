@@ -5,3 +5,8 @@ declare module 'virtual:pitch-processor' {
   const source: string
   export default source
 }
+
+declare module 'virtual:onset-processor' {
+  const source: string
+  export default source
+}

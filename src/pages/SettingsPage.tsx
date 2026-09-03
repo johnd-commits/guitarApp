@@ -1,3 +1,4 @@
+import { LatencyCalibrate } from '../components/LatencyCalibrate'
 import { useSettingsStore } from '../stores/settingsStore'
 
 const micLabels = {
@@ -78,6 +79,8 @@ export function SettingsPage() {
           className="h-8 w-full cursor-pointer accent-amber"
         />
       </label>
+
+      <LatencyCalibrate />
 
       <div className="rounded-2xl bg-surface px-4 py-4">
         <p className="text-muted">Microphone</p>
