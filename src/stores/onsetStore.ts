@@ -9,9 +9,11 @@ type OnsetState = {
   report: TimingReport | null
   listening: boolean
   lastOnset: DetectedOnset | null
+  chroma: Float64Array | null
   pushOnset: (onset: DetectedOnset) => void
   setReport: (report: TimingReport | null) => void
   setListening: (listening: boolean) => void
+  setChroma: (chroma: Float64Array | null) => void
   clear: () => void
 }
 
@@ -20,6 +22,7 @@ export const useOnsetStore = create<OnsetState>()((set) => ({
   report: null,
   listening: false,
   lastOnset: null,
+  chroma: null,
   pushOnset: (onset) =>
     set((s) => {
       const next = [...s.onsets, onset]
@@ -30,5 +33,6 @@ export const useOnsetStore = create<OnsetState>()((set) => ({
     }),
   setReport: (report) => set({ report }),
   setListening: (listening) => set({ listening }),
-  clear: () => set({ onsets: [], report: null, lastOnset: null }),
+  setChroma: (chroma) => set({ chroma }),
+  clear: () => set({ onsets: [], report: null, lastOnset: null, chroma: null }),
 }))

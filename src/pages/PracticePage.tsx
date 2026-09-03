@@ -1,5 +1,6 @@
 import { BeatToggles } from '../components/BeatToggles'
 import { ChangeTrainer } from '../components/ChangeTrainer'
+import { CheckMyChord } from '../components/CheckMyChord'
 import { ChordFollow } from '../components/ChordFollow'
 import { MetronomeControls } from '../components/MetronomeControls'
 import { MicOnboarding } from '../components/MicOnboarding'
@@ -67,6 +68,7 @@ export function PracticePage() {
 
       {mode === 'follow' ? <ChordFollow /> : <ChangeTrainer />}
       {!noStrum ? <StrumScope /> : null}
+      <CheckMyChord />
       {mode === 'follow' || !noStrum ? <PatternPicker /> : null}
       <BeatToggles />
       <MetronomeControls />
