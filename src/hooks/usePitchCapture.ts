@@ -8,7 +8,7 @@ import { useSessionStore } from '../stores/sessionStore'
 import { useSettingsStore } from '../stores/settingsStore'
 import { useTunerStore } from '../stores/tunerStore'
 
-export function usePitchCapture(enabled: boolean) {
+export function usePitchCapture(enabled: boolean, generation = 0) {
   const enabledRef = useRef(enabled)
   enabledRef.current = enabled
 
@@ -82,5 +82,5 @@ export function usePitchCapture(enabled: boolean) {
       cancelled = true
       micCapture.stop()
     }
-  }, [enabled])
+  }, [enabled, generation])
 }

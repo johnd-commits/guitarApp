@@ -1,17 +1,18 @@
 import { useEffect, useState } from 'react'
-import { listAttempts, listChordPairs, medianLatency, outboxCount, supabaseConfigured } from '../db'
+import { listAttempts, listChordPairs, medianLatency } from '../db'
 import { observe, type AttemptRecord } from '../metrics/feedback'
 import type { ChordPairRow } from '../db'
+import { useAuthStore } from '../sync/authStore'
 
 export function ProgressPanel() {
   const [attempts, setAttempts] = useState<AttemptRecord[]>([])
   const [pairs, setPairs] = useState<ChordPairRow[]>([])
-  const [waiting, setWaiting] = useState(0)
+  const waiting = useAuthStore((s) => s.waiting)
+  const status = useAuthStore((s) => s.status)
 
   useEffect(() => {
     void listAttempts().then(setAttempts).catch(() => setAttempts([]))
     void listChordPairs().then(setPairs).catch(() => setPairs([]))
-    void outboxCount().then(setWaiting).catch(() => setWaiting(0))
   }, [])
 
   const latest = attempts[attempts.length - 1]
@@ -28,11 +29,16 @@ export function ProgressPanel() {
     .slice(-12)
     .map((p) => p.value)
 
-  const syncLabel = supabaseConfigured()
-    ? waiting > 0
-      ? `${waiting} waiting`
-      : 'synced'
-    : 'local only'
+  const syncLabel =
+    status === 'syncing'
+      ? 'syncing'
+      : status === 'waiting'
+        ? `${waiting} waiting`
+        : status === 'synced'
+          ? 'synced'
+          : status === 'local'
+            ? 'local only'
+            : 'signed out'
 
   return (
     <div className="space-y-4 rounded-2xl bg-surface px-4 py-4">

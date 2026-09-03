@@ -1,6 +1,7 @@
 import { CapoHelper } from '../components/CapoHelper'
 import { LatencyCalibrate } from '../components/LatencyCalibrate'
 import { ProgressPanel } from '../components/ProgressPanel'
+import { AccountPanel } from '../components/AccountPanel'
 import { useSettingsStore } from '../stores/settingsStore'
 
 const micLabels = {
@@ -85,6 +86,8 @@ export function SettingsPage() {
       <CapoHelper />
 
       <LatencyCalibrate />
+
+      <AccountPanel />
 
       <ProgressPanel />
 

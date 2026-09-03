@@ -68,15 +68,14 @@ export const db = new FretwiseDB()
 
 export type SyncStatus = 'local' | 'synced' | 'syncing' | 'waiting'
 
-export function supabaseConfigured(): boolean {
-  return Boolean(import.meta.env.VITE_SUPABASE_URL && import.meta.env.VITE_SUPABASE_ANON_KEY)
-}
+export { supabaseConfigured } from './sync/client'
 
 export async function enqueueOutbox(
   table: OutboxRow['table'],
   payload: unknown,
 ): Promise<void> {
   await db.outbox.add({ table, payload, createdAt: new Date().toISOString() })
+  void import('./sync/worker').then((m) => m.kickSync()).catch(() => undefined)
 }
 
 export async function saveAttempt(attempt: AttemptRecord): Promise<void> {
@@ -139,6 +138,7 @@ export async function listRecordings(): Promise<RecordingRow[]> {
 
 export async function starRecording(id: string, starred: boolean): Promise<void> {
   await db.recordings.update(id, { starred })
+  if (starred) await enqueueOutbox('recordings', { id })
 }
 
 export async function pruneRecordings(now = Date.now()): Promise<number> {

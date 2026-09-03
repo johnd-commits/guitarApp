@@ -17,6 +17,12 @@ function applyCurrent(lessonId: string, stepIndex: number) {
   if (step) applyLessonStep(step)
 }
 
+function reportProgress(lessonId: string, stepIndex: number) {
+  void import('../sync/worker')
+    .then((m) => m.pushLessonProgress(lessonId, stepIndex))
+    .catch(() => undefined)
+}
+
 export const useLessonStore = create<LessonState>()(
   persist(
     (set, get) => ({
@@ -25,6 +31,7 @@ export const useLessonStore = create<LessonState>()(
       setLesson: (id) => {
         set({ lessonId: id, stepIndex: 0 })
         applyCurrent(id, 0)
+        reportProgress(id, 0)
       },
       nextStep: () => {
         const { lessonId, stepIndex } = get()
@@ -33,12 +40,14 @@ export const useLessonStore = create<LessonState>()(
         const next = Math.min(lesson.steps.length - 1, stepIndex + 1)
         set({ stepIndex: next })
         applyCurrent(lessonId, next)
+        reportProgress(lessonId, next)
       },
       prevStep: () => {
         const { lessonId, stepIndex } = get()
         const next = Math.max(0, stepIndex - 1)
         set({ stepIndex: next })
         applyCurrent(lessonId, next)
+        reportProgress(lessonId, next)
       },
     }),
     {

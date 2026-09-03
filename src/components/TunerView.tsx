@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { getAudioContext, resumeAudioContext } from '../audio/context'
+import { micCapture } from '../audio/micCapture'
 import { LOCK_CENTS } from '../audio/pitchConstants'
 import { usePitchCapture } from '../hooks/usePitchCapture'
 import { useSessionStore } from '../stores/sessionStore'
@@ -9,7 +10,8 @@ import { TUNINGS, stringTargets, tuningById } from '../tuner/notes'
 
 export function TunerView({ mode }: { mode: 'gate' | 'standalone' }) {
   const [armed, setArmed] = useState(false)
-  usePitchCapture(armed)
+  const [micGeneration, setMicGeneration] = useState(0)
+  usePitchCapture(armed, micGeneration)
   const tuningId = useTunerStore((s) => s.tuningId)
   const setTuningId = useTunerStore((s) => s.setTuningId)
   const locks = useTunerStore((s) => s.locks)
@@ -39,6 +41,15 @@ export function TunerView({ mode }: { mode: 'gate' | 'standalone' }) {
 
   async function listen() {
     await resumeAudioContext()
+    setArmed(true)
+  }
+
+  async function reconnectMic() {
+    micCapture.stop()
+    setArmed(false)
+    useSettingsStore.getState().setMicPermissionState('prompt')
+    await resumeAudioContext()
+    setMicGeneration((n) => n + 1)
     setArmed(true)
   }
 
@@ -128,10 +139,18 @@ export function TunerView({ mode }: { mode: 'gate' | 'standalone' }) {
 
       {permission === 'denied' && (
         <p className="rounded-2xl bg-surface px-4 py-4 text-muted">
-          Microphone is blocked in the browser. Pitch readings need it on this
-          device.
+          Microphone is blocked in the browser. Unblock it in the address bar,
+          then tap Reconnect microphone.
         </p>
       )}
+
+      <button
+        type="button"
+        onClick={() => void reconnectMic()}
+        className="min-h-14 w-full rounded-2xl bg-surface font-medium text-ink ring-1 ring-line"
+      >
+        Reconnect microphone
+      </button>
 
       {mode === 'gate' && (
         <button

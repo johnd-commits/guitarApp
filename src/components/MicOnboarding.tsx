@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { resumeAudioContext } from '../audio/context'
+import { micCapture } from '../audio/micCapture'
 import { usePitchCapture } from '../hooks/usePitchCapture'
 import { useSettingsStore } from '../stores/settingsStore'
 import { useTunerStore } from '../stores/tunerStore'
@@ -7,8 +8,9 @@ import { LevelMeter } from './LevelMeter'
 
 export function MicOnboarding({ onContinue }: { onContinue: () => void }) {
   const [listening, setListening] = useState(false)
+  const [micGeneration, setMicGeneration] = useState(0)
   const permission = useSettingsStore((s) => s.micPermissionState)
-  usePitchCapture(listening)
+  usePitchCapture(listening, micGeneration)
   const rms = useTunerStore((s) => s.live.rms)
   const peak = Math.round(Math.min(1, rms / 0.15) * 100)
 
@@ -40,8 +42,8 @@ export function MicOnboarding({ onContinue }: { onContinue: () => void }) {
           <LevelMeter rms={rms} />
           {permission === 'denied' ? (
             <p className="rounded-2xl bg-surface px-4 py-4 text-muted">
-              Microphone is blocked in the browser. The tuner needs it on this
-              device — nothing leaves the phone.
+              Microphone is blocked in the browser. Unblock it in the address bar,
+              then tap Reconnect microphone. Nothing leaves the phone.
             </p>
           ) : (
             <p className="text-sm text-off">
@@ -55,6 +57,21 @@ export function MicOnboarding({ onContinue }: { onContinue: () => void }) {
             className="min-h-14 w-full rounded-2xl bg-amber font-medium text-bg"
           >
             Continue to the tuner
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              micCapture.stop()
+              setListening(false)
+              useSettingsStore.getState().setMicPermissionState('prompt')
+              void resumeAudioContext().then(() => {
+                setMicGeneration((n) => n + 1)
+                setListening(true)
+              })
+            }}
+            className="min-h-14 w-full rounded-2xl bg-surface font-medium ring-1 ring-line"
+          >
+            Reconnect microphone
           </button>
         </>
       ) : (
