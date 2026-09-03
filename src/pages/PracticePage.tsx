@@ -1,3 +1,5 @@
+import { useState } from 'react'
+import { BackingControls } from '../components/BackingControls'
 import { BeatToggles } from '../components/BeatToggles'
 import { ChangeTrainer } from '../components/ChangeTrainer'
 import { CheckMyChord } from '../components/CheckMyChord'
@@ -8,10 +10,10 @@ import { PatternPicker } from '../components/PatternPicker'
 import { StrumScope } from '../components/StrumScope'
 import { TunerView } from '../components/TunerView'
 import { useOnsetCapture } from '../hooks/useOnsetCapture'
+import { useBackingStore } from '../stores/backingStore'
 import { useChangeTrainerStore } from '../stores/changeTrainerStore'
 import { useSessionStore } from '../stores/sessionStore'
 import { useSettingsStore } from '../stores/settingsStore'
-import { useState } from 'react'
 
 export function PracticePage() {
   const onboarded = useSessionStore((s) => s.micOnboarded)
@@ -20,6 +22,7 @@ export function PracticePage() {
   const isPlaying = useSettingsStore((s) => s.isPlaying)
   useOnsetCapture(onboarded && gateOpen && isPlaying)
   const noStrum = useChangeTrainerStore((s) => s.noStrum)
+  const solo = useBackingStore((s) => s.solo)
   const [mode, setMode] = useState<'follow' | 'changes'>('follow')
 
   if (!onboarded) {
@@ -43,33 +46,41 @@ export function PracticePage() {
         </p>
       </div>
 
-      <div className="grid grid-cols-2 gap-2">
-        <button
-          type="button"
-          onClick={() => setMode('follow')}
-          className={[
-            'min-h-12 rounded-2xl font-medium',
-            mode === 'follow' ? 'bg-amber text-bg' : 'bg-surface text-ink',
-          ].join(' ')}
-        >
-          Follow
-        </button>
-        <button
-          type="button"
-          onClick={() => setMode('changes')}
-          className={[
-            'min-h-12 rounded-2xl font-medium',
-            mode === 'changes' ? 'bg-amber text-bg' : 'bg-surface text-ink',
-          ].join(' ')}
-        >
-          Changes
-        </button>
-      </div>
-
-      {mode === 'follow' ? <ChordFollow /> : <ChangeTrainer />}
-      {!noStrum ? <StrumScope /> : null}
-      <CheckMyChord />
-      {mode === 'follow' || !noStrum ? <PatternPicker /> : null}
+      {solo ? (
+        <p className="font-display text-xl text-amber">
+          Solo — band only. No pattern, no analysis, nothing stored.
+        </p>
+      ) : (
+        <>
+          <div className="grid grid-cols-2 gap-2">
+            <button
+              type="button"
+              onClick={() => setMode('follow')}
+              className={[
+                'min-h-12 rounded-2xl font-medium',
+                mode === 'follow' ? 'bg-amber text-bg' : 'bg-surface text-ink',
+              ].join(' ')}
+            >
+              Follow
+            </button>
+            <button
+              type="button"
+              onClick={() => setMode('changes')}
+              className={[
+                'min-h-12 rounded-2xl font-medium',
+                mode === 'changes' ? 'bg-amber text-bg' : 'bg-surface text-ink',
+              ].join(' ')}
+            >
+              Changes
+            </button>
+          </div>
+          {mode === 'follow' ? <ChordFollow /> : <ChangeTrainer />}
+          {!noStrum ? <StrumScope /> : null}
+          <CheckMyChord />
+          {mode === 'follow' || !noStrum ? <PatternPicker /> : null}
+        </>
+      )}
+      <BackingControls />
       <BeatToggles />
       <MetronomeControls />
     </section>

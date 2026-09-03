@@ -1,3 +1,4 @@
+import { backingEngine } from './backingEngine'
 import {
   advanceCursor,
   describeClick,
@@ -114,6 +115,7 @@ export class MetronomeEngine {
     while (this.cursor.time < horizon) {
       const click = describeClick(this.cursor, this.config)
       if (click.audible) this.scheduleClick(click)
+      backingEngine.onGrid(click)
       this.pendingVisuals.push(click)
       this.cursor = advanceCursor(this.cursor, this.config)
     }

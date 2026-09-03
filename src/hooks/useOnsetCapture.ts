@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react'
 import { micCapture } from '../audio/micCapture'
+import { backingEngine } from '../audio/backingEngine'
 import { metronomeEngine } from '../audio/metronomeEngine'
 import { analyseTiming, expectedSlotsFromPattern } from '../audio/timingAnalyser'
 import { useMetronomeStore } from '../stores/metronomeStore'
@@ -30,6 +31,7 @@ export function useOnsetCapture(enabled: boolean) {
         await micCapture.start({
           onset: (onset) => {
             if (cancelled || !enabledRef.current) return
+            if (backingEngine.recentHitTimes(onset.time).length > 0) return
             useOnsetStore.getState().pushOnset(onset)
           },
         })
