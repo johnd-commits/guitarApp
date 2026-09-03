@@ -10,17 +10,21 @@ export type PitchFrame = {
   currentTime: number
 }
 
-const MIC_CONSTRAINTS: MediaTrackConstraints = {
+const BASE_AUDIO: MediaTrackConstraints = {
   echoCancellation: false,
   noiseSuppression: false,
   autoGainControl: false,
-  channelCount: 1,
+}
+
+export type MicStartOptions = {
+  deviceId?: string | null
+  gain?: number
 }
 
 type Handlers = {
   pitch?: (frame: PitchFrame) => void
   onset?: (onset: DetectedOnset) => void
-  chroma?: (chroma: Float64Array) => void
+  chroma?: (chroma: Float64Array, energy: number) => void
 }
 
 /**
@@ -36,15 +40,17 @@ export class MicCapture {
   private onsetUrl: string | null = null
   private pitchLoaded = false
   private onsetLoaded = false
+  private inputGain: GainNode | null = null
 
-  async start(handlers: Handlers): Promise<void> {
+  async start(handlers: Handlers, options: MicStartOptions = {}): Promise<void> {
     this.stop()
     const ctx = await resumeAudioContext()
 
-    this.stream = await navigator.mediaDevices.getUserMedia({
-      audio: MIC_CONSTRAINTS,
-      video: false,
-    })
+    this.stream = await openMicStream(options.deviceId)
+
+    const inputGain = ctx.createGain()
+    inputGain.gain.value = Number.isFinite(options.gain) ? Math.max(0.25, options.gain ?? 1) : 1
+    this.inputGain = inputGain
 
     if (handlers.pitch && !this.pitchLoaded) {
       this.pitchUrl = URL.createObjectURL(
@@ -65,13 +71,14 @@ export class MicCapture {
     this.sink = ctx.createGain()
     this.sink.gain.value = 0
     this.sink.connect(ctx.destination)
+    this.source.connect(inputGain)
 
     if (handlers.pitch) {
       this.pitchNode = new AudioWorkletNode(ctx, 'pitch-processor')
       this.pitchNode.port.onmessage = (event: MessageEvent<PitchFrame>) => {
         handlers.pitch?.(event.data)
       }
-      this.source.connect(this.pitchNode)
+      inputGain.connect(this.pitchNode)
       this.pitchNode.connect(this.sink)
     }
     if (handlers.onset) {
@@ -79,16 +86,21 @@ export class MicCapture {
       this.onsetNode.port.onmessage = (event: MessageEvent) => {
         const data = event.data as { type?: string; time?: number; energy?: number; chroma?: number[] }
         if (data?.type === 'chroma' && data.chroma) {
-          handlers.chroma?.(new Float64Array(data.chroma))
+          handlers.chroma?.(new Float64Array(data.chroma), data.energy ?? 0)
           return
         }
         if (typeof data?.time === 'number') {
           handlers.onset?.({ time: data.time, energy: data.energy ?? 0 })
         }
       }
-      this.source.connect(this.onsetNode)
+      inputGain.connect(this.onsetNode)
       this.onsetNode.connect(this.sink)
     }
+  }
+
+  setInputGain(gain: number) {
+    if (!this.inputGain) return
+    this.inputGain.gain.value = Math.max(0.25, gain)
   }
 
   getStream(): MediaStream | null {
@@ -102,13 +114,29 @@ export class MicCapture {
     this.onsetNode?.disconnect()
     this.source?.disconnect()
     this.sink?.disconnect()
+    this.inputGain?.disconnect()
     this.pitchNode = null
     this.onsetNode = null
     this.source = null
     this.sink = null
+    this.inputGain = null
     this.stream?.getTracks().forEach((track) => track.stop())
     this.stream = null
   }
 }
 
 export const micCapture = new MicCapture()
+
+async function openMicStream(deviceId?: string | null): Promise<MediaStream> {
+  const preferred: MediaTrackConstraints = deviceId
+    ? { ...BASE_AUDIO, deviceId: { exact: deviceId } }
+    : { ...BASE_AUDIO }
+  try {
+    return await navigator.mediaDevices.getUserMedia({ audio: preferred, video: false })
+  } catch (error) {
+    if (deviceId) {
+      return await navigator.mediaDevices.getUserMedia({ audio: BASE_AUDIO, video: false })
+    }
+    throw error
+  }
+}

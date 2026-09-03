@@ -1,7 +1,9 @@
 import { useEffect, useRef } from 'react'
+import { currentMicOptions, describeMicError } from '../audio/micOptions'
 import { micCapture, type PitchFrame } from '../audio/micCapture'
 import { acceptPitch } from '../audio/pitchGate'
 import { metronomeEngine } from '../audio/metronomeEngine'
+import { micGainFromSensitivity } from '../audio/micGain'
 import { allLocked, stepLock } from '../tuner/lock'
 import { centsOff, detectString, stringTargets, tuningById } from '../tuner/notes'
 import { useSessionStore } from '../stores/sessionStore'
@@ -11,11 +13,17 @@ import { useTunerStore } from '../stores/tunerStore'
 export function usePitchCapture(enabled: boolean, generation = 0) {
   const enabledRef = useRef(enabled)
   enabledRef.current = enabled
+  const sensitivity = useSettingsStore((s) => s.micSensitivity)
+
+  useEffect(() => {
+    micCapture.setInputGain(micGainFromSensitivity(sensitivity))
+  }, [sensitivity])
 
   useEffect(() => {
     if (!enabled) return
 
     useSettingsStore.getState().setPlaying(false)
+    useSettingsStore.getState().setMicError(null)
     metronomeEngine.stop()
 
     let cancelled = false
@@ -37,6 +45,7 @@ export function usePitchCapture(enabled: boolean, generation = 0) {
           frequency: null,
           cents: null,
           rms: frame.rms,
+          clarity: frame.clarity,
           detectedString: previousString,
         })
         if (allLocked(nextLocks)) useSessionStore.getState().openPracticeGate()
@@ -58,6 +67,7 @@ export function usePitchCapture(enabled: boolean, generation = 0) {
         frequency: frame.frequency,
         cents,
         rms: frame.rms,
+        clarity: frame.clarity,
         detectedString: index,
       })
       if (allLocked(nextLocks)) useSessionStore.getState().openPracticeGate()
@@ -65,15 +75,17 @@ export function usePitchCapture(enabled: boolean, generation = 0) {
 
     void (async () => {
       try {
-        await micCapture.start({ pitch: onFrame })
+        await micCapture.start({ pitch: onFrame }, currentMicOptions())
         if (cancelled) {
           micCapture.stop()
           return
         }
         useSettingsStore.getState().setMicPermissionState('granted')
-      } catch {
+        useSettingsStore.getState().setMicError(null)
+      } catch (error) {
         if (!cancelled) {
           useSettingsStore.getState().setMicPermissionState('denied')
+          useSettingsStore.getState().setMicError(describeMicError(error))
         }
       }
     })()

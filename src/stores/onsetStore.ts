@@ -10,10 +10,11 @@ type OnsetState = {
   listening: boolean
   lastOnset: DetectedOnset | null
   chroma: Float64Array | null
+  chromaEnergy: number
   pushOnset: (onset: DetectedOnset) => void
   setReport: (report: TimingReport | null) => void
   setListening: (listening: boolean) => void
-  setChroma: (chroma: Float64Array | null) => void
+  setChroma: (chroma: Float64Array | null, energy?: number) => void
   clear: () => void
 }
 
@@ -23,6 +24,7 @@ export const useOnsetStore = create<OnsetState>()((set) => ({
   listening: false,
   lastOnset: null,
   chroma: null,
+  chromaEnergy: 0,
   pushOnset: (onset) =>
     set((s) => {
       const next = [...s.onsets, onset]
@@ -33,6 +35,7 @@ export const useOnsetStore = create<OnsetState>()((set) => ({
     }),
   setReport: (report) => set({ report }),
   setListening: (listening) => set({ listening }),
-  setChroma: (chroma) => set({ chroma }),
-  clear: () => set({ onsets: [], report: null, lastOnset: null, chroma: null }),
+  setChroma: (chroma, energy = 0) => set({ chroma, chromaEnergy: chroma ? energy : 0 }),
+  clear: () =>
+    set({ onsets: [], report: null, lastOnset: null, chroma: null, chromaEnergy: 0 }),
 }))

@@ -1,5 +1,6 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
+import { DEFAULT_MIC_SENSITIVITY, clampMicSensitivity } from '../audio/micGain'
 
 export type MicPermissionState = 'unknown' | 'prompt' | 'granted' | 'denied'
 
@@ -20,11 +21,17 @@ export type SettingsState = {
   micPermissionState: MicPermissionState
   isPlaying: boolean
   latencyOffsetMs: number
+  micDeviceId: string | null
+  micSensitivity: number
+  micError: string | null
   setTempo: (bpm: number) => void
   setMetronomeEnabled: (enabled: boolean) => void
   setCountInBars: (bars: 1 | 2) => void
   setCapoPosition: (fret: number) => void
   setMicPermissionState: (state: MicPermissionState) => void
+  setMicDeviceId: (id: string | null) => void
+  setMicSensitivity: (value: number) => void
+  setMicError: (message: string | null) => void
   setLatencyOffsetMs: (ms: number) => void
   setPlaying: (playing: boolean) => void
   togglePlaying: () => void
@@ -40,12 +47,18 @@ export const useSettingsStore = create<SettingsState>()(
       micPermissionState: 'unknown',
       isPlaying: false,
       latencyOffsetMs: 0,
+      micDeviceId: null,
+      micSensitivity: DEFAULT_MIC_SENSITIVITY,
+      micError: null,
       setTempo: (bpm) => set({ tempo: clampTempo(bpm) }),
       setMetronomeEnabled: (enabled) => set({ metronomeEnabled: enabled }),
       setCountInBars: (bars) => set({ countInBars: bars }),
       setCapoPosition: (fret) =>
         set({ capoPosition: Math.min(12, Math.max(0, Math.round(fret))) }),
       setMicPermissionState: (state) => set({ micPermissionState: state }),
+      setMicDeviceId: (id) => set({ micDeviceId: id && id.length > 0 ? id : null }),
+      setMicSensitivity: (value) => set({ micSensitivity: clampMicSensitivity(value) }),
+      setMicError: (message) => set({ micError: message }),
       setLatencyOffsetMs: (ms) =>
         set({ latencyOffsetMs: Math.min(120, Math.max(0, Math.round(ms))) }),
       setPlaying: (playing) => set({ isPlaying: playing }),
@@ -59,6 +72,8 @@ export const useSettingsStore = create<SettingsState>()(
         countInBars: state.countInBars,
         capoPosition: state.capoPosition,
         micPermissionState: state.micPermissionState,
+        micDeviceId: state.micDeviceId,
+        micSensitivity: state.micSensitivity,
         latencyOffsetMs: state.latencyOffsetMs,
       }),
     },

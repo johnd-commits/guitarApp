@@ -1,12 +1,12 @@
 import { useEffect, useRef, useState } from 'react'
 import { getAudioContext, resumeAudioContext } from '../audio/context'
-import { micCapture } from '../audio/micCapture'
 import { LOCK_CENTS } from '../audio/pitchConstants'
 import { usePitchCapture } from '../hooks/usePitchCapture'
 import { useSessionStore } from '../stores/sessionStore'
 import { useSettingsStore } from '../stores/settingsStore'
 import { useTunerStore } from '../stores/tunerStore'
 import { TUNINGS, stringTargets, tuningById } from '../tuner/notes'
+import { MicSettings } from './MicSettings'
 
 export function TunerView({ mode }: { mode: 'gate' | 'standalone' }) {
   const [armed, setArmed] = useState(false)
@@ -18,7 +18,6 @@ export function TunerView({ mode }: { mode: 'gate' | 'standalone' }) {
   const live = useTunerStore((s) => s.live)
   const resetLocks = useTunerStore((s) => s.resetLocks)
   const capo = useSettingsStore((s) => s.capoPosition)
-  const permission = useSettingsStore((s) => s.micPermissionState)
   const skip = useSessionStore((s) => s.openPracticeGate)
   const targets = stringTargets(tuningById(tuningId), capo)
   const inTune = live.cents !== null && Math.abs(live.cents) <= LOCK_CENTS
@@ -44,10 +43,7 @@ export function TunerView({ mode }: { mode: 'gate' | 'standalone' }) {
     setArmed(true)
   }
 
-  async function reconnectMic() {
-    micCapture.stop()
-    setArmed(false)
-    useSettingsStore.getState().setMicPermissionState('prompt')
+  async function reopenMic() {
     await resumeAudioContext()
     setMicGeneration((n) => n + 1)
     setArmed(true)
@@ -137,20 +133,7 @@ export function TunerView({ mode }: { mode: 'gate' | 'standalone' }) {
         </div>
       </fieldset>
 
-      {permission === 'denied' && (
-        <p className="rounded-2xl bg-surface px-4 py-4 text-muted">
-          Microphone is blocked in the browser. Unblock it in the address bar,
-          then tap Reconnect microphone.
-        </p>
-      )}
-
-      <button
-        type="button"
-        onClick={() => void reconnectMic()}
-        className="min-h-14 w-full rounded-2xl bg-surface font-medium text-ink ring-1 ring-line"
-      >
-        Reconnect microphone
-      </button>
+      <MicSettings open={armed} onOpen={() => void reopenMic()} />
 
       {mode === 'gate' && (
         <button

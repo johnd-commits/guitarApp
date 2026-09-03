@@ -1,5 +1,7 @@
 import { useEffect, useRef } from 'react'
 import { micCapture } from '../audio/micCapture'
+import { currentMicOptions, describeMicError } from '../audio/micOptions'
+import { micGainFromSensitivity } from '../audio/micGain'
 import { backingEngine } from '../audio/backingEngine'
 import { metronomeEngine } from '../audio/metronomeEngine'
 import { analyseTiming, expectedSlotsFromPattern } from '../audio/timingAnalyser'
@@ -16,6 +18,11 @@ import { selectActivePattern, useStrumStore } from '../stores/strumStore'
 export function useOnsetCapture(enabled: boolean) {
   const enabledRef = useRef(enabled)
   enabledRef.current = enabled
+  const sensitivity = useSettingsStore((s) => s.micSensitivity)
+
+  useEffect(() => {
+    micCapture.setInputGain(micGainFromSensitivity(sensitivity))
+  }, [sensitivity])
 
   useEffect(() => {
     if (!enabled) {
@@ -28,27 +35,32 @@ export function useOnsetCapture(enabled: boolean) {
 
     void (async () => {
       try {
-        await micCapture.start({
-          onset: (onset) => {
-            if (cancelled || !enabledRef.current) return
-            if (backingEngine.recentHitTimes(onset.time).length > 0) return
-            useOnsetStore.getState().pushOnset(onset)
+        await micCapture.start(
+          {
+            onset: (onset) => {
+              if (cancelled || !enabledRef.current) return
+              if (backingEngine.recentHitTimes(onset.time).length > 0) return
+              useOnsetStore.getState().pushOnset(onset)
+            },
+            chroma: (chroma, energy) => {
+              if (cancelled || !enabledRef.current) return
+              useOnsetStore.getState().setChroma(chroma, energy)
+            },
           },
-          chroma: (chroma) => {
-            if (cancelled || !enabledRef.current) return
-            useOnsetStore.getState().setChroma(chroma)
-          },
-        })
+          currentMicOptions(),
+        )
         if (cancelled) {
           micCapture.stop()
           return
         }
         useOnsetStore.getState().setListening(true)
         useSettingsStore.getState().setMicPermissionState('granted')
-      } catch {
+        useSettingsStore.getState().setMicError(null)
+      } catch (error) {
         if (!cancelled) {
           useOnsetStore.getState().setListening(false)
           useSettingsStore.getState().setMicPermissionState('denied')
+          useSettingsStore.getState().setMicError(describeMicError(error))
         }
       }
     })()

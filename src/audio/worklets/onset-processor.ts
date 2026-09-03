@@ -12,7 +12,11 @@ class OnsetProcessor extends AudioWorkletProcessor {
     }
     const chroma = this.tracker.takeChroma()
     if (chroma) {
-      this.port.postMessage({ type: 'chroma', chroma: Array.from(chroma) })
+      this.port.postMessage({
+        type: 'chroma',
+        chroma: Array.from(chroma.chroma),
+        energy: chroma.energy,
+      })
     }
     return true
   }

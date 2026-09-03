@@ -7,6 +7,7 @@ export type TunerLive = {
   frequency: number | null
   cents: number | null
   rms: number
+  clarity: number
   detectedString: number | null
 }
 
@@ -25,14 +26,14 @@ export const useTunerStore = create<TunerState>()(
     (set) => ({
       tuningId: 'standard',
       locks: emptyLocks(),
-      live: { frequency: null, cents: null, rms: 0, detectedString: null },
+      live: { frequency: null, cents: null, rms: 0, clarity: 0, detectedString: null },
       setTuningId: (id) => set({ tuningId: id, locks: emptyLocks() }),
       setLocks: (locks) => set({ locks }),
       setLive: (live) => set({ live }),
       resetLocks: () =>
         set({
           locks: emptyLocks(),
-          live: { frequency: null, cents: null, rms: 0, detectedString: null },
+          live: { frequency: null, cents: null, rms: 0, clarity: 0, detectedString: null },
         }),
     }),
     {

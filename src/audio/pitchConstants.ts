@@ -2,13 +2,14 @@
 export const PITCH_WINDOW = 4096
 
 /** pitchy clarity below this is treated as noise, not a note. */
-export const CLARITY_GATE = 0.9
+export const CLARITY_GATE = 0.8
 
 /**
- * RMS amplitude gate. A full-scale sine is ~0.707; room noise sits well
- * below 0.01. Anything quieter is ignored so the tuner does not jump.
+ * RMS amplitude gate, measured after mic gain. A full-scale sine is ~0.707;
+ * room noise sits well below 0.004. Anything quieter is ignored so the
+ * tuner does not jump.
  */
-export const RMS_GATE = 0.01
+export const RMS_GATE = 0.004
 
 /** A string locks after staying inside this band for LOCK_SECONDS. */
 export const LOCK_CENTS = 5

@@ -6,8 +6,14 @@
 
 export const CHROMA_CLASSES = 12
 export const CHROMA_WINDOW_SECONDS = 0.2
+/** How peaked the 12-class mix must be before we treat it as a chord, not room noise. */
+export const CHROMA_FOCUS_GATE = 0.42
+/** Guitar-band FFT magnitude sum; below this the mix is mostly silence. */
+export const CHROMA_ENERGY_GATE = 12
+export const GUESS_HISTORY = 5
+export const GUESS_MIN_VOTES = 3
 
-const NOTE_NAMES = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'] as const
+export const NOTE_NAMES = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'] as const
 
 export type ChordQuality = 'major' | 'minor' | '7' | 'm7' | 'sus2' | 'sus4'
 
@@ -100,6 +106,61 @@ export function matchChroma(chroma: ArrayLike<number>): ChordGuess | null {
   }
   if (!best || best.confidence < 0.55) return null
   return best
+}
+
+/**
+ * Share of L2 energy in the three loudest pitch classes.
+ * A triad sits near 1; hiss is closer to 3/12 = 0.25.
+ */
+export function chromaFocus(chroma: ArrayLike<number>): number {
+  const powers = Array.from({ length: 12 }, (_, i) => {
+    const v = chroma[i] ?? 0
+    return v * v
+  })
+  let total = 0
+  for (const p of powers) total += p
+  if (total < 1e-12) return 0
+  powers.sort((a, b) => b - a)
+  return (powers[0] + powers[1] + powers[2]) / total
+}
+
+export function guessFromChroma(
+  chroma: ArrayLike<number>,
+  energy = Number.POSITIVE_INFINITY,
+): ChordGuess | null {
+  if (energy < CHROMA_ENERGY_GATE) return null
+  if (chromaFocus(chroma) < CHROMA_FOCUS_GATE) return null
+  return matchChroma(chroma)
+}
+
+export function majorityGuess(
+  history: Array<ChordGuess | null>,
+  minVotes = GUESS_MIN_VOTES,
+): ChordGuess | null {
+  const counts = new Map<string, { guess: ChordGuess; n: number; conf: number }>()
+  for (const guess of history) {
+    if (!guess) continue
+    const cur = counts.get(guess.name)
+    if (cur) {
+      cur.n += 1
+      cur.conf += guess.confidence
+    } else {
+      counts.set(guess.name, { guess, n: 1, conf: guess.confidence })
+    }
+  }
+  let best: { guess: ChordGuess; n: number; conf: number } | null = null
+  for (const entry of counts.values()) {
+    if (entry.n < minVotes) continue
+    if (
+      !best ||
+      entry.n > best.n ||
+      (entry.n === best.n && entry.conf > best.conf)
+    ) {
+      best = entry
+    }
+  }
+  if (!best) return null
+  return { ...best.guess, confidence: best.conf / best.n }
 }
 
 /** Energy per expected string pitch-class, for "check my chord". */

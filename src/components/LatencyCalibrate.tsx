@@ -7,6 +7,7 @@ import {
   unlockForCalibration,
 } from '../audio/latencyCalibrate'
 import { micCapture } from '../audio/micCapture'
+import { currentMicOptions } from '../audio/micOptions'
 import { useSettingsStore } from '../stores/settingsStore'
 
 export function LatencyCalibrate() {
@@ -22,11 +23,14 @@ export function LatencyCalibrate() {
     const onsets: number[] = []
     try {
       await unlockForCalibration()
-      await micCapture.start({
-        onset: (onset) => {
-          onsets.push(onset.time)
+      await micCapture.start(
+        {
+          onset: (onset) => {
+            onsets.push(onset.time)
+          },
         },
-      })
+        currentMicOptions(),
+      )
       const clicks = scheduleCalibrationClicks()
       const last = clicks[clicks.length - 1] ?? 0
       await waitUntil(last + 0.25)

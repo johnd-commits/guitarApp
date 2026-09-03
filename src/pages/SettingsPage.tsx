@@ -2,23 +2,22 @@ import { CapoHelper } from '../components/CapoHelper'
 import { LatencyCalibrate } from '../components/LatencyCalibrate'
 import { ProgressPanel } from '../components/ProgressPanel'
 import { AccountPanel } from '../components/AccountPanel'
+import { MicSettings } from '../components/MicSettings'
+import { usePitchCapture } from '../hooks/usePitchCapture'
 import { useSettingsStore } from '../stores/settingsStore'
-
-const micLabels = {
-  unknown: 'Not requested yet',
-  prompt: 'Browser will ask',
-  granted: 'Allowed on this device',
-  denied: 'Blocked in the browser',
-} as const
+import { useState } from 'react'
+import { resumeAudioContext } from '../audio/context'
 
 export function SettingsPage() {
   const metronomeEnabled = useSettingsStore((s) => s.metronomeEnabled)
   const countInBars = useSettingsStore((s) => s.countInBars)
   const capoPosition = useSettingsStore((s) => s.capoPosition)
-  const micPermissionState = useSettingsStore((s) => s.micPermissionState)
   const setMetronomeEnabled = useSettingsStore((s) => s.setMetronomeEnabled)
   const setCountInBars = useSettingsStore((s) => s.setCountInBars)
   const setCapoPosition = useSettingsStore((s) => s.setCapoPosition)
+  const [micOpen, setMicOpen] = useState(false)
+  const [micGeneration, setMicGeneration] = useState(0)
+  usePitchCapture(micOpen, micGeneration)
 
   return (
     <section className="space-y-6">
@@ -28,8 +27,8 @@ export function SettingsPage() {
           Instrument setup
         </h1>
         <p className="text-muted">
-          These persist on this phone. Tempo lives on the transport so it is
-          always within reach.
+          These persist on this phone. Tempo lives on the transport; tap Show
+          metronome when you need the slider.
         </p>
       </div>
 
@@ -91,14 +90,15 @@ export function SettingsPage() {
 
       <ProgressPanel />
 
-      <div className="rounded-2xl bg-surface px-4 py-4">
-        <p className="text-muted">Microphone</p>
-        <p className="mt-1">{micLabels[micPermissionState]}</p>
-        <p className="mt-2 text-sm text-off">
-          Audio is processed on this device. Nothing is uploaded unless you
-          opt in, recording by recording.
-        </p>
-      </div>
+      <MicSettings
+        open={micOpen}
+        onOpen={() => {
+          void resumeAudioContext().then(() => {
+            setMicGeneration((n) => n + 1)
+            setMicOpen(true)
+          })
+        }}
+      />
     </section>
   )
 }

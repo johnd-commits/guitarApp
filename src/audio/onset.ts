@@ -155,6 +155,7 @@ export function createOnsetTracker(sampleRate: number) {
   let lastOnset = -Infinity
   let hopsSinceChroma = 0
   let pendingChroma: Float64Array | null = null
+  let pendingEnergy = 0
   const chromaEvery = Math.max(1, Math.round((0.2 * sampleRate) / hop))
 
   function unwrap() {
@@ -196,12 +197,14 @@ export function createOnsetTracker(sampleRate: number) {
         if (hopsSinceChroma >= chromaEvery) {
           hopsSinceChroma = 0
           pendingChroma = chromaFromMagnitudes(curr, sampleRate, fftSize)
+          pendingEnergy = energy
         }
       }
       return found
     },
-    takeChroma(): Float64Array | null {
-      const next = pendingChroma
+    takeChroma(): { chroma: Float64Array; energy: number } | null {
+      if (!pendingChroma) return null
+      const next = { chroma: pendingChroma, energy: pendingEnergy }
       pendingChroma = null
       return next
     },

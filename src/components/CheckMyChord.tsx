@@ -46,7 +46,7 @@ export function CheckMyChord() {
         {match
           ? `${guess.name} is ringing (${(guess.confidence * 100).toFixed(0)}% chroma match)`
           : guess
-            ? `Holding ${chord.name}`
+            ? `Heard ${guess.name} (${(guess.confidence * 100).toFixed(0)}% chroma match) while holding ${chord.name}`
             : `Hold ${chord.name} — waiting for a ringing shape`}
       </p>
       {presence.length > 0 ? (
