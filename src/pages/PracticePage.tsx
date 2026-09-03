@@ -1,19 +1,31 @@
-import { useState } from 'react'
 import { BackingControls } from '../components/BackingControls'
 import { BeatToggles } from '../components/BeatToggles'
 import { ChangeTrainer } from '../components/ChangeTrainer'
 import { CheckMyChord } from '../components/CheckMyChord'
 import { ChordFollow } from '../components/ChordFollow'
+import { LessonPlayer } from '../components/LessonPlayer'
 import { MetronomeControls } from '../components/MetronomeControls'
 import { MicOnboarding } from '../components/MicOnboarding'
 import { PatternPicker } from '../components/PatternPicker'
+import { SessionBuilder } from '../components/SessionBuilder'
+import { SessionRecorder } from '../components/SessionRecorder'
 import { StrumScope } from '../components/StrumScope'
+import { TakeFeedback } from '../components/TakeFeedback'
 import { TunerView } from '../components/TunerView'
+import { useAttemptSession } from '../hooks/useAttemptSession'
 import { useOnsetCapture } from '../hooks/useOnsetCapture'
 import { useBackingStore } from '../stores/backingStore'
 import { useChangeTrainerStore } from '../stores/changeTrainerStore'
+import { usePracticeStore, type PracticeMode } from '../stores/practiceStore'
 import { useSessionStore } from '../stores/sessionStore'
 import { useSettingsStore } from '../stores/settingsStore'
+
+const MODES: Array<{ id: PracticeMode; label: string }> = [
+  { id: 'follow', label: 'Follow' },
+  { id: 'changes', label: 'Changes' },
+  { id: 'lessons', label: 'Lessons' },
+  { id: 'session', label: 'Session' },
+]
 
 export function PracticePage() {
   const onboarded = useSessionStore((s) => s.micOnboarded)
@@ -21,9 +33,11 @@ export function PracticePage() {
   const setMicOnboarded = useSessionStore((s) => s.setMicOnboarded)
   const isPlaying = useSettingsStore((s) => s.isPlaying)
   useOnsetCapture(onboarded && gateOpen && isPlaying)
+  const take = useAttemptSession()
   const noStrum = useChangeTrainerStore((s) => s.noStrum)
   const solo = useBackingStore((s) => s.solo)
-  const [mode, setMode] = useState<'follow' | 'changes'>('follow')
+  const mode = usePracticeStore((s) => s.mode)
+  const setMode = usePracticeStore((s) => s.setMode)
 
   if (!onboarded) {
     return <MicOnboarding onContinue={() => setMicOnboarded(true)} />
@@ -52,34 +66,33 @@ export function PracticePage() {
         </p>
       ) : (
         <>
-          <div className="grid grid-cols-2 gap-2">
-            <button
-              type="button"
-              onClick={() => setMode('follow')}
-              className={[
-                'min-h-12 rounded-2xl font-medium',
-                mode === 'follow' ? 'bg-amber text-bg' : 'bg-surface text-ink',
-              ].join(' ')}
-            >
-              Follow
-            </button>
-            <button
-              type="button"
-              onClick={() => setMode('changes')}
-              className={[
-                'min-h-12 rounded-2xl font-medium',
-                mode === 'changes' ? 'bg-amber text-bg' : 'bg-surface text-ink',
-              ].join(' ')}
-            >
-              Changes
-            </button>
+          <div className="grid grid-cols-4 gap-2">
+            {MODES.map((item) => (
+              <button
+                key={item.id}
+                type="button"
+                onClick={() => setMode(item.id)}
+                className={[
+                  'min-h-12 rounded-2xl text-sm font-medium',
+                  mode === item.id ? 'bg-amber text-bg' : 'bg-surface text-ink',
+                ].join(' ')}
+              >
+                {item.label}
+              </button>
+            ))}
           </div>
-          {mode === 'follow' ? <ChordFollow /> : <ChangeTrainer />}
-          {!noStrum ? <StrumScope /> : null}
-          <CheckMyChord />
-          {mode === 'follow' || !noStrum ? <PatternPicker /> : null}
+          {mode === 'follow' ? <ChordFollow /> : null}
+          {mode === 'changes' ? <ChangeTrainer /> : null}
+          {mode === 'lessons' ? <LessonPlayer /> : null}
+          {mode === 'session' ? <SessionBuilder /> : null}
+          {mode === 'follow' || (mode === 'changes' && !noStrum) ? <StrumScope /> : null}
+          {mode === 'follow' || mode === 'changes' ? <CheckMyChord /> : null}
+          {mode === 'follow' || (mode === 'changes' && !noStrum) ? <PatternPicker /> : null}
+          <TakeFeedback take={take} />
+          <SessionRecorder keepPrompt={take.keepPrompt} />
         </>
       )}
+      {solo ? <SessionRecorder keepPrompt={false} /> : null}
       <BackingControls />
       <BeatToggles />
       <MetronomeControls />

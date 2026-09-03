@@ -1,4 +1,5 @@
 import { fftRadix2, hann, magnitudeAt } from './fft'
+import { chromaFromMagnitudes } from './chroma'
 
 export const FFT_SIZE = 2048
 export const HOP_SIZE = 512
@@ -152,6 +153,9 @@ export function createOnsetTracker(sampleRate: number) {
   let histWrite = 0
   let prevFlux = 0
   let lastOnset = -Infinity
+  let hopsSinceChroma = 0
+  let pendingChroma: Float64Array | null = null
+  const chromaEvery = Math.max(1, Math.round((0.2 * sampleRate) / hop))
 
   function unwrap() {
     const start = write
@@ -188,8 +192,18 @@ export function createOnsetTracker(sampleRate: number) {
         history[histWrite] = flux
         histWrite = (histWrite + 1) % FLUX_HISTORY
         prevFlux = flux
+        hopsSinceChroma += 1
+        if (hopsSinceChroma >= chromaEvery) {
+          hopsSinceChroma = 0
+          pendingChroma = chromaFromMagnitudes(curr, sampleRate, fftSize)
+        }
       }
       return found
+    },
+    takeChroma(): Float64Array | null {
+      const next = pendingChroma
+      pendingChroma = null
+      return next
     },
   }
 }

@@ -22,6 +22,32 @@ export function countCleanChanges(
   return count
 }
 
+/** Signed offset of the nearest onset to each change, in milliseconds. */
+export function changeLatenciesMs(
+  onsets: Array<{ time: number }>,
+  changeTimes: number[],
+  latencySeconds: number,
+  windowMs = 150,
+): number[] {
+  const windowS = windowMs / 1000
+  const used = new Set<number>()
+  const out: number[] = []
+  for (const boundary of changeTimes) {
+    let best: { i: number; dist: number; offset: number } | null = null
+    for (let i = 0; i < onsets.length; i++) {
+      if (used.has(i)) continue
+      const offset = onsets[i].time - latencySeconds - boundary
+      const dist = Math.abs(offset)
+      if (dist > windowS) continue
+      if (!best || dist < best.dist) best = { i, dist, offset }
+    }
+    if (!best) continue
+    used.add(best.i)
+    out.push(best.offset * 1000)
+  }
+  return out
+}
+
 export function changeTimesFromOrigin(
   origin: number,
   countInBeats: number,

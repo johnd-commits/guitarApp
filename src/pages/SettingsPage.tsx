@@ -1,5 +1,6 @@
 import { CapoHelper } from '../components/CapoHelper'
 import { LatencyCalibrate } from '../components/LatencyCalibrate'
+import { ProgressPanel } from '../components/ProgressPanel'
 import { useSettingsStore } from '../stores/settingsStore'
 
 const micLabels = {
@@ -84,6 +85,8 @@ export function SettingsPage() {
       <CapoHelper />
 
       <LatencyCalibrate />
+
+      <ProgressPanel />
 
       <div className="rounded-2xl bg-surface px-4 py-4">
         <p className="text-muted">Microphone</p>

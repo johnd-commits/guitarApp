@@ -15,6 +15,12 @@ export const PATTERN_LIBRARY: StrumPattern[] = [
   patternFromKinds('d-d-udu', 'D-D-UDU', 'eighth', [H, M, H, M, H, H, H, M]),
   patternFromKinds('reggae-chuck', 'Reggae off-beat chuck', 'eighth', [M, X, M, X, M, X, M, X]),
   patternFromKinds('one-drop-skank', 'One-drop skank', 'eighth', [M, M, H, M, M, M, H, M]),
+  patternFromKinds(
+    'double-skank',
+    'Double skank',
+    'sixteenth',
+    [M, M, M, M, H, H, M, M, M, M, M, M, H, H, M, M],
+  ),
 ]
 
 export const DEFAULT_PATTERN_ID = 'd-du-udu'

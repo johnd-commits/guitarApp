@@ -38,6 +38,32 @@ export class BackingEngine {
     solo: false,
   }
   private scheduledTimes: number[] = []
+  private master: GainNode | null = null
+  private mixTaps = new Set<AudioNode>()
+
+  private bus(): GainNode {
+    const ctx = getAudioContext()
+    if (!this.master || this.master.context !== ctx) {
+      this.master = ctx.createGain()
+      this.master.gain.value = 1
+      this.master.connect(ctx.destination)
+    }
+    return this.master
+  }
+
+  connectMix(dest: AudioNode) {
+    this.bus().connect(dest)
+    this.mixTaps.add(dest)
+  }
+
+  disconnectMix(dest: AudioNode) {
+    try {
+      this.master?.disconnect(dest)
+    } catch {
+      /* already disconnected */
+    }
+    this.mixTaps.delete(dest)
+  }
 
   setConfig(partial: Partial<BackingConfig>) {
     this.config = { ...this.config, ...partial }
@@ -74,7 +100,7 @@ export class BackingEngine {
       gain.gain.setValueAtTime(vol, time)
       gain.gain.exponentialRampToValueAtTime(0.0001, time + 0.18)
       osc.connect(gain)
-      gain.connect(ctx.destination)
+      gain.connect(this.bus())
       osc.start(time)
       osc.stop(time + 0.2)
       return
@@ -86,7 +112,7 @@ export class BackingEngine {
       gain.gain.setValueAtTime(vol * 0.4, time)
       gain.gain.exponentialRampToValueAtTime(0.0001, time + 0.12)
       osc.connect(gain)
-      gain.connect(ctx.destination)
+      gain.connect(this.bus())
       osc.start(time)
       osc.stop(time + 0.14)
       const noise = ctx.createOscillator()
@@ -96,7 +122,7 @@ export class BackingEngine {
       ng.gain.setValueAtTime(vol * 0.25, time)
       ng.gain.exponentialRampToValueAtTime(0.0001, time + 0.08)
       noise.connect(ng)
-      ng.connect(ctx.destination)
+      ng.connect(this.bus())
       noise.start(time)
       noise.stop(time + 0.1)
       return
@@ -109,7 +135,7 @@ export class BackingEngine {
       gain.gain.setValueAtTime(vol * 0.08, time)
       gain.gain.exponentialRampToValueAtTime(0.0001, time + 0.03)
       osc.connect(gain)
-      gain.connect(ctx.destination)
+      gain.connect(this.bus())
       osc.start(time)
       osc.stop(time + 0.04)
       return
@@ -121,7 +147,7 @@ export class BackingEngine {
     gain.gain.setValueAtTime(vol * 0.35, time)
     gain.gain.exponentialRampToValueAtTime(0.0001, time + 0.28)
     osc.connect(gain)
-    gain.connect(ctx.destination)
+    gain.connect(this.bus())
     osc.start(time)
     osc.stop(time + 0.3)
   }

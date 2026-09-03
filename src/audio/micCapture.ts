@@ -20,6 +20,7 @@ const MIC_CONSTRAINTS: MediaTrackConstraints = {
 type Handlers = {
   pitch?: (frame: PitchFrame) => void
   onset?: (onset: DetectedOnset) => void
+  chroma?: (chroma: Float64Array) => void
 }
 
 /**
@@ -75,8 +76,15 @@ export class MicCapture {
     }
     if (handlers.onset) {
       this.onsetNode = new AudioWorkletNode(ctx, 'onset-processor')
-      this.onsetNode.port.onmessage = (event: MessageEvent<DetectedOnset>) => {
-        handlers.onset?.(event.data)
+      this.onsetNode.port.onmessage = (event: MessageEvent) => {
+        const data = event.data as { type?: string; time?: number; energy?: number; chroma?: number[] }
+        if (data?.type === 'chroma' && data.chroma) {
+          handlers.chroma?.(new Float64Array(data.chroma))
+          return
+        }
+        if (typeof data?.time === 'number') {
+          handlers.onset?.({ time: data.time, energy: data.energy ?? 0 })
+        }
       }
       this.source.connect(this.onsetNode)
       this.onsetNode.connect(this.sink)

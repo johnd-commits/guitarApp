@@ -8,7 +8,11 @@ class OnsetProcessor extends AudioWorkletProcessor {
     if (!channel) return true
     const onsets = this.tracker.push(channel, currentTime)
     for (const onset of onsets) {
-      this.port.postMessage(onset)
+      this.port.postMessage({ type: 'onset', time: onset.time, energy: onset.energy })
+    }
+    const chroma = this.tracker.takeChroma()
+    if (chroma) {
+      this.port.postMessage({ type: 'chroma', chroma: Array.from(chroma) })
     }
     return true
   }

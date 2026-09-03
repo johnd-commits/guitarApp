@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { changeTimesFromOrigin, countCleanChanges } from './changes'
+import { changeLatenciesMs, changeTimesFromOrigin, countCleanChanges } from './changes'
 
 describe('one-minute changes', () => {
   it('counts an onset inside 80ms of a bar-change as clean', () => {
@@ -16,5 +16,9 @@ describe('one-minute changes', () => {
     const times = changeTimesFromOrigin(0, 4, 1, 4, 20)
     expect(times[0]).toBe(8)
     expect(times).toHaveLength(4)
+  })
+
+  it('reports signed change latency in milliseconds', () => {
+    expect(changeLatenciesMs([{ time: 1.04 }], [1], 0)[0]).toBeCloseTo(40, 8)
   })
 })

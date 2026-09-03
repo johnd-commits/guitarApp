@@ -19,6 +19,7 @@ export type MetronomeState = {
   setSwing: (swing: number) => void
   toggleMute: (beatIndex: number) => void
   toggleAccent: (beatIndex: number) => void
+  setBeatFlags: (beats: BeatFlags[]) => void
   setCurrentPulse: (beat: number | null, slot: number | null) => void
 }
 
@@ -58,6 +59,7 @@ export const useMetronomeStore = create<MetronomeState>()(
             i === beatIndex ? { ...b, accent: !b.accent } : b,
           ),
         })),
+      setBeatFlags: (beats) => set({ beats }),
       setCurrentPulse: (beat, slot) => set({ currentBeat: beat, currentSlot: slot }),
     }),
     {

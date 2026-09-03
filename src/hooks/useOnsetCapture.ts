@@ -34,6 +34,10 @@ export function useOnsetCapture(enabled: boolean) {
             if (backingEngine.recentHitTimes(onset.time).length > 0) return
             useOnsetStore.getState().pushOnset(onset)
           },
+          chroma: (chroma) => {
+            if (cancelled || !enabledRef.current) return
+            useOnsetStore.getState().setChroma(chroma)
+          },
         })
         if (cancelled) {
           micCapture.stop()
