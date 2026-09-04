@@ -154,10 +154,12 @@ function SlotGlyph({ slot }: { slot: StrumSlot }) {
         {hit && !down ? 'UP' : '\u00a0'}
       </span>
       <span data-glyph className="flex">
+        {/* SVG y grows downward. DOWN tip sits at the floor (high E);
+            UP tip sits at the top. Labels stay on the matching side. */}
         <svg width="28" height="36" viewBox="0 0 24 40" aria-hidden="true">
           {down ? (
             <path
-              d="M12 2 L22 16 H17 V36 H7 V16 H2 Z"
+              d="M12 38 L2 24 H7 V4 H17 V24 H22 Z"
               fill={fill}
               stroke={stroke}
               strokeWidth={slot.accent ? 2.4 : 1.6}
@@ -165,7 +167,7 @@ function SlotGlyph({ slot }: { slot: StrumSlot }) {
             />
           ) : (
             <path
-              d="M12 38 L2 24 H7 V4 H17 V24 H22 Z"
+              d="M12 2 L22 16 H17 V36 H7 V16 H2 Z"
               fill={fill}
               stroke={stroke}
               strokeWidth={slot.accent ? 2.4 : 1.6}

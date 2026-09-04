@@ -26,6 +26,7 @@ describe('settings store', () => {
       capoPosition: 0,
       micPermissionState: 'unknown',
       isPlaying: false,
+      transportDisplayMode: 'collapsed',
     })
   })
 
@@ -40,5 +41,14 @@ describe('settings store', () => {
     useSettingsStore.getState().togglePlaying()
     expect(useSettingsStore.getState().isPlaying).toBe(true)
     expect(useSettingsStore.getState().tempo).toBe(60)
+  })
+
+  it('defaults transport display mode to collapsed', () => {
+    expect(useSettingsStore.getState().transportDisplayMode).toBe('collapsed')
+  })
+
+  it('persists transport display mode changes', () => {
+    useSettingsStore.getState().setTransportDisplayMode('pinned')
+    expect(useSettingsStore.getState().transportDisplayMode).toBe('pinned')
   })
 })

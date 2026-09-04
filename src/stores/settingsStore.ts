@@ -4,6 +4,9 @@ import { DEFAULT_MIC_SENSITIVITY, clampMicSensitivity } from '../audio/micGain'
 
 export type MicPermissionState = 'unknown' | 'prompt' | 'granted' | 'denied'
 
+/** How the transport bar shows the pendulum and tempo slider. */
+export type TransportDisplayMode = 'pinned' | 'collapsed' | 'auto'
+
 export const MIN_TEMPO = 40
 export const MAX_TEMPO = 200
 export const DEFAULT_TEMPO = 80
@@ -24,6 +27,7 @@ export type SettingsState = {
   micDeviceId: string | null
   micSensitivity: number
   micError: string | null
+  transportDisplayMode: TransportDisplayMode
   setTempo: (bpm: number) => void
   setMetronomeEnabled: (enabled: boolean) => void
   setCountInBars: (bars: 1 | 2) => void
@@ -35,6 +39,7 @@ export type SettingsState = {
   setLatencyOffsetMs: (ms: number) => void
   setPlaying: (playing: boolean) => void
   togglePlaying: () => void
+  setTransportDisplayMode: (mode: TransportDisplayMode) => void
 }
 
 export const useSettingsStore = create<SettingsState>()(
@@ -50,6 +55,7 @@ export const useSettingsStore = create<SettingsState>()(
       micDeviceId: null,
       micSensitivity: DEFAULT_MIC_SENSITIVITY,
       micError: null,
+      transportDisplayMode: 'collapsed',
       setTempo: (bpm) => set({ tempo: clampTempo(bpm) }),
       setMetronomeEnabled: (enabled) => set({ metronomeEnabled: enabled }),
       setCountInBars: (bars) => set({ countInBars: bars }),
@@ -63,6 +69,7 @@ export const useSettingsStore = create<SettingsState>()(
         set({ latencyOffsetMs: Math.min(120, Math.max(0, Math.round(ms))) }),
       setPlaying: (playing) => set({ isPlaying: playing }),
       togglePlaying: () => set((s) => ({ isPlaying: !s.isPlaying })),
+      setTransportDisplayMode: (mode) => set({ transportDisplayMode: mode }),
     }),
     {
       name: 'fretwise-settings',
@@ -75,6 +82,7 @@ export const useSettingsStore = create<SettingsState>()(
         micDeviceId: state.micDeviceId,
         micSensitivity: state.micSensitivity,
         latencyOffsetMs: state.latencyOffsetMs,
+        transportDisplayMode: state.transportDisplayMode,
       }),
     },
   ),

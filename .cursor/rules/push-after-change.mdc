@@ -1,0 +1,15 @@
+---
+description: Commit and push to origin after every completed change
+alwaysApply: true
+---
+
+# Push after every change
+
+After a completed feature, fix, or UI change:
+
+1. Create a git commit (do not wait to be asked).
+2. Push `main` to origin immediately so Vercel can build.
+   Use: `git -c credential.helper= -c credential.helper="!gh auth git-credential" push origin main`
+3. Return the commit hash and confirm the push.
+
+Do not skip the push because tests are still running on a later task. Do not batch unrelated unfinished work if the current change is already complete.
