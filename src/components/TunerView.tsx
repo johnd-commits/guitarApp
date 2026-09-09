@@ -65,9 +65,10 @@ export function TunerView({ mode }: { mode: 'gate' | 'standalone' }) {
           </p>
         ) : (
           <p className="text-muted">
-            Tap a string to hold it, or play any open string for auto. A string
-            locks after holding within {LOCK_CENTS} cents for 1.0s. Tap the same
-            string again to go back to auto.
+            Tap a string to hold it. The needle sits parked until a pitch is
+            heard, then it moves left if you are flat and right if you are
+            sharp. A string locks after holding within {LOCK_CENTS} cents for
+            1.0s. Tap the same string again to go back to auto.
           </p>
         )}
       </div>
@@ -87,9 +88,9 @@ export function TunerView({ mode }: { mode: 'gate' | 'standalone' }) {
       <p className="text-center font-display text-2xl tabular-nums">
         {live.cents === null
           ? selectedString !== null
-            ? `Waiting for ${targets[selectedString]?.name}`
-            : 'Waiting for a string'
-          : `${Math.abs(live.cents).toFixed(0)} cents ${live.cents < 0 ? 'below' : 'above'} ${targets[live.detectedString ?? 0]?.name}`}
+            ? `Needle parked. 0 Hz heard — pluck ${targets[selectedString]?.name}`
+            : 'Needle parked. 0 Hz heard — pluck an open string'
+          : `${live.frequency?.toFixed(0)} Hz · ${Math.abs(live.cents).toFixed(0)} cents ${live.cents < 0 ? 'below' : 'above'} ${targets[live.detectedString ?? 0]?.name}`}
       </p>
 
       <div className="grid grid-cols-6 gap-1.5">
@@ -167,19 +168,45 @@ export function TunerView({ mode }: { mode: 'gate' | 'standalone' }) {
 }
 
 function CentsBar({ cents, inTune }: { cents: number | null; inTune: boolean }) {
-  const clamped = cents === null ? 0 : Math.max(-50, Math.min(50, cents))
+  const heard = cents !== null
+  const clamped = heard ? Math.max(-50, Math.min(50, cents)) : 0
   const left = 50 + clamped
 
   return (
-    <div className="relative h-10 rounded-2xl bg-surface">
-      <div className="absolute inset-y-0 left-1/2 w-px bg-line" />
+    <div className="space-y-1">
       <div
-        className={[
-          'absolute top-1/2 h-6 w-6 -translate-x-1/2 -translate-y-1/2 rounded-full transition-[left,background-color]',
-          inTune ? 'bg-amber' : 'bg-off',
-        ].join(' ')}
-        style={{ left: `${left}%` }}
-      />
+        className="relative h-12 rounded-2xl bg-surface"
+        role="meter"
+        aria-label="Cents from target"
+        aria-valuemin={-50}
+        aria-valuemax={50}
+        aria-valuenow={heard ? Math.round(cents) : undefined}
+        aria-valuetext={
+          heard
+            ? `${Math.abs(cents).toFixed(0)} cents ${cents < 0 ? 'flat' : 'sharp'}`
+            : 'No pitch'
+        }
+      >
+        <div className="absolute inset-y-0 left-1/2 w-px bg-line" />
+        {heard ? (
+          <div
+            className={[
+              'absolute top-1/2 h-7 w-7 -translate-x-1/2 -translate-y-1/2 rounded-full transition-[left,background-color]',
+              inTune ? 'bg-amber' : 'bg-off',
+            ].join(' ')}
+            style={{ left: `${left}%` }}
+          />
+        ) : (
+          <p className="absolute inset-0 flex items-center justify-center text-sm text-muted">
+            Parked — no pitch
+          </p>
+        )}
+      </div>
+      <div className="flex justify-between px-1 text-[0.7rem] text-muted">
+        <span>50¢ flat</span>
+        <span>in tune</span>
+        <span>50¢ sharp</span>
+      </div>
     </div>
   )
 }

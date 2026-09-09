@@ -1,5 +1,5 @@
 export function LevelMeter({ rms }: { rms: number }) {
-  const fill = Math.min(1, rms / 0.15)
+  const fill = Math.min(1, rms / 0.04)
 
   return (
     <div

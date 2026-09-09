@@ -20,7 +20,7 @@ export function MicSettings({ open, onOpen, meter = 'pitch' }: Props) {
   const permission = useSettingsStore((s) => s.micPermissionState)
   const error = useSettingsStore((s) => s.micError)
   const live = useTunerStore((s) => s.live)
-  const peak = Math.round(Math.min(1, live.rms / 0.15) * 100)
+  const peak = Math.round(Math.min(1, live.rms / 0.04) * 100)
 
   useEffect(() => {
     void refreshDevices()
@@ -55,7 +55,7 @@ export function MicSettings({ open, onOpen, meter = 'pitch' }: Props) {
       {meter === 'pitch' && open ? (
         <p className="text-sm text-muted">
           {waiting
-            ? `Mic is open. Level at ${peak}% — play closer to the mic or raise sensitivity.`
+            ? `Mic is open. Level at ${peak}% of the meter. The needle stays parked until that number moves — pick a different input if it stays at 0%.`
             : muddy
               ? `Level at ${peak}%. Clarity ${(live.clarity * 100).toFixed(0)}% (needs ${(CLARITY_GATE * 100).toFixed(0)}%) — hold a single open string.`
               : live.cents !== null

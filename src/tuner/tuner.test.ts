@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { PitchDetector } from 'pitchy'
-import { CLARITY_GATE, PITCH_WINDOW, RMS_GATE } from '../audio/pitchConstants'
-import { acceptPitch, rms } from '../audio/pitchGate'
+import { CLARITY_GATE, DISPLAY_RMS_GATE, PITCH_WINDOW, RMS_GATE } from '../audio/pitchConstants'
+import { acceptPitch, displayPitch, rms } from '../audio/pitchGate'
 import { centsOff, detectString, midiToFreq, stringTargets, stringToMeasure, tuningById } from './notes'
 import { allLocked, emptyLocks, stepLock } from './lock'
 
@@ -21,6 +21,15 @@ describe('pitch gates', () => {
 
   it('rejects a loud but unclear reading', () => {
     expect(acceptPitch(110, CLARITY_GATE - 0.05, 0.2)).toBe(false)
+  })
+
+  it('moves the needle on a quiet but clear A2 that would not lock', () => {
+    const quiet = sine(110, 44100, PITCH_WINDOW, 0.002)
+    const amplitude = rms(quiet)
+    expect(amplitude).toBeLessThan(RMS_GATE)
+    expect(amplitude).toBeGreaterThan(DISPLAY_RMS_GATE)
+    expect(acceptPitch(110, 0.99, amplitude)).toBe(false)
+    expect(displayPitch(110, 0.99, amplitude)).toBe(true)
   })
 })
 

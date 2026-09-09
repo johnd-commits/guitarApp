@@ -22,6 +22,8 @@ describe('tuner string pick', () => {
     render(<TunerView mode="standalone" />)
     fireEvent.click(screen.getByRole('button', { name: 'Tune G3' }))
     expect(useTunerStore.getState().selectedString).toBe(3)
+    expect(screen.getByText(/needle parked/i)).toBeInTheDocument()
+    expect(screen.getByText(/parked — no pitch/i)).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Tune G3' })).toHaveAttribute(
       'aria-pressed',
       'true',

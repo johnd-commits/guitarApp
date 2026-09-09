@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react'
 import { currentMicOptions, describeMicError } from '../audio/micOptions'
 import { micCapture, type PitchFrame } from '../audio/micCapture'
-import { acceptPitch } from '../audio/pitchGate'
+import { acceptPitch, displayPitch } from '../audio/pitchGate'
 import { metronomeEngine } from '../audio/metronomeEngine'
 import { micGainFromSensitivity } from '../audio/micGain'
 import { allLocked, stepLock } from '../tuner/lock'
@@ -34,9 +34,10 @@ export function usePitchCapture(enabled: boolean, generation = 0) {
       const { tuningId, locks, selectedString } = useTunerStore.getState()
       const capo = useSettingsStore.getState().capoPosition
       const targets = stringTargets(tuningById(tuningId), capo)
+      const show = displayPitch(frame.frequency, frame.clarity, frame.rms)
       const ok = acceptPitch(frame.frequency, frame.clarity, frame.rms)
 
-      if (!ok) {
+      if (!show) {
         const nextLocks = locks.map((lock) =>
           stepLock(lock, { detected: false, cents: null, now: frame.currentTime }),
         )
@@ -62,8 +63,8 @@ export function usePitchCapture(enabled: boolean, generation = 0) {
       const cents = centsOff(frame.frequency, targets[index].frequency)
       const nextLocks = locks.map((lock, i) =>
         stepLock(lock, {
-          detected: i === index,
-          cents: i === index ? cents : null,
+          detected: ok && i === index,
+          cents: ok && i === index ? cents : null,
           now: frame.currentTime,
         }),
       )
