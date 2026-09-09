@@ -16,6 +16,8 @@ export function TunerView({ mode }: { mode: 'gate' | 'standalone' }) {
   const setTuningId = useTunerStore((s) => s.setTuningId)
   const locks = useTunerStore((s) => s.locks)
   const live = useTunerStore((s) => s.live)
+  const selectedString = useTunerStore((s) => s.selectedString)
+  const setSelectedString = useTunerStore((s) => s.setSelectedString)
   const resetLocks = useTunerStore((s) => s.resetLocks)
   const capo = useSettingsStore((s) => s.capoPosition)
   const skip = useSessionStore((s) => s.openPracticeGate)
@@ -54,17 +56,18 @@ export function TunerView({ mode }: { mode: 'gate' | 'standalone' }) {
       <div className="space-y-2">
         <p className="font-display text-sm tracking-wide text-amber">Tuner</p>
         <h1 className="font-display text-3xl font-semibold leading-tight">
-          Six strings, detected automatically
+          Tap the string you are tuning
         </h1>
         {capo > 0 ? (
           <p className="text-muted">
             Capo fret {capo} — targets sit {capo} semitone{capo === 1 ? '' : 's'} higher
-            than the open-neck notes.
+            than the open-neck notes. Tap a string to hold it; tap again for auto.
           </p>
         ) : (
           <p className="text-muted">
-            Play any open string. A string locks after holding within {LOCK_CENTS}{' '}
-            cents for 1.0s.
+            Tap a string to hold it, or play any open string for auto. A string
+            locks after holding within {LOCK_CENTS} cents for 1.0s. Tap the same
+            string again to go back to auto.
           </p>
         )}
       </div>
@@ -83,33 +86,48 @@ export function TunerView({ mode }: { mode: 'gate' | 'standalone' }) {
 
       <p className="text-center font-display text-2xl tabular-nums">
         {live.cents === null
-          ? 'Waiting for a string'
+          ? selectedString !== null
+            ? `Waiting for ${targets[selectedString]?.name}`
+            : 'Waiting for a string'
           : `${Math.abs(live.cents).toFixed(0)} cents ${live.cents < 0 ? 'below' : 'above'} ${targets[live.detectedString ?? 0]?.name}`}
       </p>
 
       <div className="grid grid-cols-6 gap-1.5">
         {targets.map((target) => {
           const lock = locks[target.index]
+          const selected = selectedString === target.index
           const active = live.detectedString === target.index
           return (
-            <div
+            <button
               key={target.index}
+              type="button"
+              aria-pressed={selected}
+              aria-label={`Tune ${target.name}`}
+              onClick={() =>
+                setSelectedString(selected ? null : target.index)
+              }
               className={[
                 'flex min-h-20 flex-col items-center justify-center rounded-2xl px-1 text-center',
                 lock.locked
                   ? 'bg-amber text-bg'
-                  : active
+                  : selected
                     ? 'bg-raised ring-2 ring-amber'
-                    : 'bg-surface text-ink',
+                    : active
+                      ? 'bg-raised ring-2 ring-off'
+                      : 'bg-surface text-ink',
               ].join(' ')}
             >
               <span className="font-display text-lg leading-none">
                 {target.name.replace(/\d+$/, '')}
               </span>
               <span className="mt-1 text-[0.7rem] text-current opacity-80">
-                {lock.locked ? '1.0s' : `${Math.min(1, lock.heldSeconds).toFixed(1)}s`}
+                {lock.locked
+                  ? '1.0s'
+                  : selected
+                    ? 'held'
+                    : `${Math.min(1, lock.heldSeconds).toFixed(1)}s`}
               </span>
-            </div>
+            </button>
           )
         })}
       </div>

@@ -69,7 +69,7 @@ describe('app shell', () => {
     )
 
     expect(
-      screen.getByRole('heading', { name: /six strings, detected automatically/i }),
+      screen.getByRole('heading', { name: /tap the string you are tuning/i }),
     ).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /skip, already tuned/i })).toBeInTheDocument()
   })

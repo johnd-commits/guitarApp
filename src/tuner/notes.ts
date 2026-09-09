@@ -97,3 +97,17 @@ export function detectString(
   if (prevAbs <= STICK_CENTS) return previousIndex
   return best
 }
+
+/**
+ * A tapped string stays selected until the tap is cleared. Auto-detect
+ * only runs when nothing is pinned.
+ */
+export function stringToMeasure(
+  frequency: number,
+  targets: StringTarget[],
+  previousIndex: number | null,
+  selectedIndex: number | null,
+): number {
+  if (selectedIndex !== null && targets[selectedIndex]) return selectedIndex
+  return detectString(frequency, targets, previousIndex)
+}

@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { PitchDetector } from 'pitchy'
 import { CLARITY_GATE, PITCH_WINDOW, RMS_GATE } from '../audio/pitchConstants'
 import { acceptPitch, rms } from '../audio/pitchGate'
-import { centsOff, detectString, midiToFreq, stringTargets, tuningById } from './notes'
+import { centsOff, detectString, midiToFreq, stringTargets, stringToMeasure, tuningById } from './notes'
 import { allLocked, emptyLocks, stepLock } from './lock'
 
 function sine(freq: number, sampleRate: number, length: number, amplitude = 0.4): Float32Array {
@@ -70,6 +70,13 @@ describe('cents and string detect', () => {
     const targets = stringTargets(tuningById('drop-d'), 0)
     expect(targets[0].name).toBe('D2')
     expect(detectString(midiToFreq(38), targets, null)).toBe(0)
+  })
+
+  it('keeps a tapped string even when the pitch is nearer another', () => {
+    const targets = stringTargets(tuningById('standard'), 0)
+    // 110 Hz is A, but G (index 3) stays selected.
+    expect(stringToMeasure(110, targets, null, 3)).toBe(3)
+    expect(stringToMeasure(110, targets, 1, null)).toBe(1)
   })
 })
 

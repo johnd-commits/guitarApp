@@ -5,7 +5,7 @@ import { acceptPitch } from '../audio/pitchGate'
 import { metronomeEngine } from '../audio/metronomeEngine'
 import { micGainFromSensitivity } from '../audio/micGain'
 import { allLocked, stepLock } from '../tuner/lock'
-import { centsOff, detectString, stringTargets, tuningById } from '../tuner/notes'
+import { centsOff, stringTargets, stringToMeasure, tuningById } from '../tuner/notes'
 import { useSessionStore } from '../stores/sessionStore'
 import { useSettingsStore } from '../stores/settingsStore'
 import { useTunerStore } from '../stores/tunerStore'
@@ -31,7 +31,7 @@ export function usePitchCapture(enabled: boolean, generation = 0) {
 
     const onFrame = (frame: PitchFrame) => {
       if (cancelled || !enabledRef.current) return
-      const { tuningId, locks } = useTunerStore.getState()
+      const { tuningId, locks, selectedString } = useTunerStore.getState()
       const capo = useSettingsStore.getState().capoPosition
       const targets = stringTargets(tuningById(tuningId), capo)
       const ok = acceptPitch(frame.frequency, frame.clarity, frame.rms)
@@ -46,14 +46,19 @@ export function usePitchCapture(enabled: boolean, generation = 0) {
           cents: null,
           rms: frame.rms,
           clarity: frame.clarity,
-          detectedString: previousString,
+          detectedString: selectedString ?? previousString,
         })
         if (allLocked(nextLocks)) useSessionStore.getState().openPracticeGate()
         return
       }
 
-      const index = detectString(frame.frequency, targets, previousString)
-      previousString = index
+      const index = stringToMeasure(
+        frame.frequency,
+        targets,
+        previousString,
+        selectedString,
+      )
+      if (selectedString === null) previousString = index
       const cents = centsOff(frame.frequency, targets[index].frequency)
       const nextLocks = locks.map((lock, i) =>
         stepLock(lock, {
